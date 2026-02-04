@@ -1,12 +1,11 @@
-import { NavLink } from "react-router-dom";
-
 const footerLinks = [
-    { name: "Home", to: "/" },
-  { name: "About", to: "/about" },
-  { name: "Projects", to: "/projects" },
-  { name: "Certificates", to: "/certificates" },
-  { name: "Skills", to: "/skills" },
-  { name: "Contact", to: "/contact" },
+  { name: "Home", to: "#home" },
+  { name: "About", to: "#about" },
+  { name: "Projects", to: "#projects" },
+  { name: "Certificates", to: "#certificates" },
+  { name: "Skills", to: "#skills" },
+  { name: "Badges", to: "#badges" },
+  { name: "Contact", to: "#contact" },
 ];
 
 function Footer() {
@@ -37,20 +36,13 @@ function Footer() {
             <h4 className="text-sm font-semibold uppercase tracking-[0.08em] text-foreground/60">Navigate</h4>
             <div className="flex flex-wrap gap-3">
               {footerLinks.map((link) => (
-                <NavLink
+                <a
                   key={link.to}
-                  to={link.to}
-                  className={({ isActive }) =>
-                    [
-                      "rounded-md px-3 py-1.5 text-sm font-medium transition-all",
-                      isActive
-                        ? "bg-foreground/10 text-foreground"
-                        : "text-foreground/70 hover:text-foreground hover:bg-foreground/5",
-                    ].join(" ")
-                  }
+                  href={link.to}
+                  className="rounded-md px-3 py-1.5 text-sm font-medium text-foreground/70 transition-all hover:bg-foreground/5 hover:text-foreground"
                 >
                   {link.name}
-                </NavLink>
+                </a>
               ))}
             </div>
           </div>
@@ -60,12 +52,12 @@ function Footer() {
             <p className="text-sm leading-6 text-foreground/70">
               Ready to collaborate or have a question? Jump to the contact page and drop a note.
             </p>
-            <NavLink
-              to="/contact"
+            <a
+              href="#contact"
               className="inline-flex w-fit items-center justify-center rounded-md bg-foreground px-4 py-2 text-sm font-semibold text-background transition hover:opacity-90"
             >
               Contact
-            </NavLink>
+            </a>
           </div>
         </div>
 

@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { NavLink } from "react-router-dom";
 import { MoonStar, SunMedium } from "lucide-react";
 
 const links = [
-  { name: "About", to: "/about" },
-  { name: "Projects", to: "/projects" },
-  { name: "Certificates", to: "/certificates" },
-  { name: "Skills", to: "/skills" },
-  { name: "Contact", to: "/contact" },
+  { name: "About", to: "#about" },
+  { name: "Projects", to: "#projects" },
+  { name: "Certificates", to: "#certificates" },
+  { name: "Skills", to: "#skills" },
+  { name: "Badges", to: "#badges" },
+  { name: "Contact", to: "#contact" },
 ];
 
 function Navbar() {
@@ -32,28 +32,25 @@ function Navbar() {
 
   const navLinkClass = useMemo(
     () =>
-      ({ isActive }) =>
-        [
-          "text-base font-semibold px-2 py-1.5 rounded-md transition-all duration-200",
-          isActive
-            ? "bg-foreground/10 text-red-900 text-foreground scale-105"
-            : "text-foreground/50 hover:text-foreground hover:scale-105",
-        ].join(" "),
+      [
+        "text-base font-semibold px-2 py-1.5 rounded-md transition-all duration-200",
+        "text-foreground/70 hover:text-foreground hover:scale-105",
+      ].join(" "),
     []
   );
 
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-12 px-3 sm:px-4 lg:px-6">
-        <NavLink to="/" className=" w-min text-3xl leading-6 tracking-tight font-bold text-foreground">
+        <a href="#home" className=" w-min text-3xl leading-6 tracking-tight font-bold text-foreground">
           <p className="font-sans">Paramjit Patel</p>
-        </NavLink>
+        </a>
 
         <div className="hidden items-center gap-8 md:flex">
           {links.map((link) => (
-            <NavLink key={link.to} to={link.to} className={navLinkClass} onClick={() => setIsOpen(false)}>
+            <a key={link.to} href={link.to} className={navLinkClass} onClick={() => setIsOpen(false)}>
               {link.name}
-            </NavLink>
+            </a>
           ))}
         </div>
 
@@ -86,14 +83,14 @@ function Navbar() {
         <div className="bg-background px-4 py-3 md:hidden">
           <div className="flex flex-col gap-3">
             {links.map((link) => (
-              <NavLink
+              <a
                 key={link.to}
-                to={link.to}
+                href={link.to}
                 className={navLinkClass}
                 onClick={() => setIsOpen(false)}
               >
                 {link.name}
-              </NavLink>
+              </a>
             ))}
           </div>
         </div>

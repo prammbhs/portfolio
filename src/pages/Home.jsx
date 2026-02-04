@@ -1,32 +1,19 @@
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchProfile } from "../lib/cosmicClient";
+import ProfileCardWithStats from "../components/ProfileCardWithStats";
+import { fetchProfile, fetchPlatformData } from "../lib/cosmicClient";
 
-function SkillIconGrid({ items }) {
-  if (!items?.length) return null;
-  return (
-    <div className="flex flex-wrap gap-3">
-      {items.map((item) => {
-        const id = item?.toString().trim().toLowerCase();
-        if (!id) return null;
-        const src = `https://skillicons.dev/icons?i=${encodeURIComponent(id)}&theme=dark`;
-        return (
-          <div
-            key={item}
-            className="flex items-center gap-2 rounded-lg border border-foreground/10 bg-foreground/5 px-3 py-2 shadow-sm"
-          >
-            <img
-              src={src}
-              alt={id}
-              loading="lazy"
-              className="h-6 w-6 shrink-0"
-            />
-            <span className="text-sm font-medium text-foreground/80 capitalize">{item}</span>
-          </div>
-        );
-      })}
-    </div>
-  );
+const CODOLIO_USER_KEY = "Paramjit_Patel";
+
+async function fetchCodolioProfile() {
+  const url = `https://api.codolio.com/github/profile?userKey=${encodeURIComponent(CODOLIO_USER_KEY)}`;
+  const res = await fetch(url, { method: "GET" });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok || !json?.data) {
+    const msg = json?.status?.message || `${res.status} ${res.statusText}`;
+    throw new Error(`Codolio fetch failed: ${msg}`);
+  }
+  return json.data;
 }
 
 function Home() {
@@ -34,6 +21,27 @@ function Home() {
     queryKey: ["profile"],
     queryFn: () => fetchProfile(),
   });
+
+  const { data: platformData } = useQuery({
+    queryKey: ["platformdata"],
+    queryFn: () => fetchPlatformData(),
+    staleTime: 24 * 60 * 60 * 1000,
+  });
+
+  const { data: codolioData } = useQuery({
+    queryKey: ["codolio", CODOLIO_USER_KEY],
+    queryFn: fetchCodolioProfile,
+    staleTime: 6 * 60 * 60 * 1000,
+  });
+
+  const [view, setView] = useState("dsa");
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setView((v) => (v === "dsa" ? "dev" : "dsa"));
+    }, 8000);
+    return () => window.clearInterval(id);
+  }, []);
 
   const skillIcons = useMemo(() => {
     if (!profile?.metadata) return [];
@@ -50,14 +58,83 @@ function Home() {
     );
   }, [profile]);
 
-  return (
-    <section className="mx-auto max-w-5xl px-4 pt-20 pb-24 md:pt-32 md:pb-28 space-y-20">
-      <div className="flex flex-col gap-8 md:grid md:grid-cols-12 md:items-start md:gap-10">
-        <div className="order-1 rounded-xl border border-foreground/10 bg-foreground/5 p-4 text-sm text-foreground/70 md:order-2 md:col-span-4 md:self-start">
-          Stats card placeholder — we can populate this with live metrics later.
-        </div>
+  const leetcode = useMemo(
+    () => platformData?.metadata?.platformdata?.platformProfiles?.find((p) => p.platform === "leetcode"),
+    [platformData]
+  );
 
-        <div className="order-2 md:col-span-7 md:order-1 space-y-8 md:pr-4">
+  const leetStats = useMemo(() => {
+    const stats = leetcode?.totalQuestionStats;
+    const questions = stats
+      ? (stats.totalQuestionCounts || 0)
+      : null;
+    return {
+      handle: leetcode?.userStats?.handle,
+      rating: leetcode?.userStats?.currentRating,
+      maxRating: leetcode?.userStats?.maxRating,
+      solved: questions,
+      badge: leetcode?.badgeStats?.badgeList?.[0]?.displayName,
+      avatar: leetcode?.userStats?.titlePhoto,
+      url: leetcode?.userStats?.handle ? `https://leetcode.com/${leetcode.userStats.handle}/` : null,
+    };
+  }, [leetcode]);
+
+  const codolioStats = useMemo(() => {
+    if (!codolioData) return null;
+    return {
+      handle: codolioData.githubProfile,
+      url: codolioData.githubProfile ? `https://github.com/${codolioData.githubProfile}` : null,
+      activeDays: codolioData.totalActiveDays,
+      contributions: codolioData.totalContributions ?? codolioData.commitCounts,
+      stars: codolioData.stars,
+    };
+  }, [codolioData]);
+
+  const dsaTotals = useMemo(() => {
+    const profiles = platformData?.metadata?.platformdata?.platformProfiles || [];
+    let easy = 0;
+    let medium = 0;
+    let hard = 0;
+    let total = 0;
+    profiles.forEach((p) => {
+      const stats = p.totalQuestionStats || {};
+      easy += stats.easyQuestionCounts || 0;
+      medium += stats.mediumQuestionCounts || 0;
+      hard += stats.hardQuestionCounts || 0;
+      total += stats.totalQuestionCounts || 0;
+    });
+    return { easy, medium, hard, total };
+  }, [platformData]);
+
+  const cardView = view === "dsa" ? leetStats : codolioStats;
+  const cardUrl = cardView?.url;
+  const dsaActive = leetStats?.activeDays ?? leetStats?.rating ?? "--";
+  const dsaContrib = dsaTotals?.total ?? "--";
+  const devActive = codolioStats?.activeDays ?? "--";
+  const devContrib = codolioStats?.contributions ?? "--";
+  const linkedinUrl = "https://www.linkedin.com/in/paramjitpatel";
+  const githubUrl = codolioStats?.url || "https://github.com/ParamjitPatel";
+
+  return (
+    <section id="home" className="mx-auto max-w-5xl pt-20 pb-24 md:pt-32 md:pb-28 space-y-20">
+      <div className="flex flex-col gap-8 md:grid md:grid-cols-12 md:items-start md:gap-12">
+        <ProfileCardWithStats
+          name={profile?.metadata?.full_name || "Profile"}
+          view={view}
+          setView={setView}
+          dsaTotals={dsaTotals}
+          dsaHandle={leetStats?.handle}
+          dsaActive={dsaActive}
+          dsaContrib={dsaContrib}
+          devHandle={codolioStats?.handle}
+          devActive={devActive}
+          devContrib={devContrib}
+          contactLabel={view === "dsa" ? "View DSA" : "View GitHub"}
+          contactUrl={cardUrl}
+          tags={skillIcons}
+        />
+
+        <div className="order-2 md:col-span-7 md:order-1 space-y-8 md:pr-4 md:pt-6">
           {isLoading && !isError && (
             <div className="space-y-2">
               <div className="h-8 w-48 rounded-md bg-foreground/10 animate-pulse" />
@@ -85,8 +162,31 @@ function Home() {
                 <a className="rounded-full bg-foreground/10 px-3 py-1 hover:text-foreground" href={`mailto:${profile.metadata.email}`}>
                   {profile.metadata.email}
                 </a>
-                <a className="rounded-full bg-foreground/10 px-3 py-1 hover:text-foreground" href={`tel:${profile.metadata.phone}`}>
-                  {profile.metadata.phone}
+                <a
+                  className="rounded-full bg-foreground/10 px-3 py-1 hover:text-foreground inline-flex items-center gap-2"
+                  href={linkedinUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <span className="inline-block h-4 w-4" aria-hidden>
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="h-full w-full">
+                      <path d="M4.98 3.5c0 1.38-1.1 2.5-2.48 2.5C1.1 6 0 4.88 0 3.5S1.1 1 2.5 1 4.98 2.12 4.98 3.5zM.22 8.99h4.56V24H.22zM8.75 8.99h4.37v2.05h.06c.61-1.16 2.1-2.38 4.32-2.38 4.62 0 5.47 3.04 5.47 6.99V24h-4.56v-7.22c0-1.72-.03-3.94-2.4-3.94-2.4 0-2.77 1.87-2.77 3.8V24H8.75z" />
+                    </svg>
+                  </span>
+                  <span>LinkedIn</span>
+                </a>
+                <a
+                  className="rounded-full bg-foreground/10 px-3 py-1 hover:text-foreground inline-flex items-center gap-2"
+                  href={githubUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <span className="inline-block h-4 w-4" aria-hidden>
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="h-full w-full">
+                      <path fillRule="evenodd" clipRule="evenodd" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56 0-.27-.01-1.17-.02-2.12-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.27-1.68-1.27-1.68-1.04-.72.08-.71.08-.71 1.15.08 1.75 1.18 1.75 1.18 1.02 1.74 2.67 1.24 3.32.95.1-.75.4-1.24.73-1.53-2.55-.29-5.24-1.27-5.24-5.67 0-1.25.45-2.27 1.17-3.07-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.15 1.17a10.9 10.9 0 0 1 5.74 0c2.18-1.48 3.14-1.17 3.14-1.17.62 1.59.23 2.76.11 3.05.73.8 1.17 1.82 1.17 3.07 0 4.41-2.69 5.38-5.26 5.66.42.36.8 1.08.8 2.18 0 1.58-.02 2.85-.02 3.24 0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z" />
+                    </svg>
+                  </span>
+                  <span>GitHub</span>
                 </a>
                 {profile.metadata.resume_pdf?.url ? (
                   <a
@@ -105,18 +205,7 @@ function Home() {
 
       </div>
 
-      <div className="h-16 md:h-24" aria-hidden="true" />
 
-      {profile ? (
-        <div className="space-y-4 pt-8" id="skills">
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.25em] text-foreground/50">Keep scrolling</p>
-            <h2 className="text-xl font-semibold text-foreground">Skills & Tools</h2>
-            <p className="text-sm text-foreground/70">Icon grid sits just below the fold so it’s discoverable.</p>
-          </div>
-          <SkillIconGrid items={skillIcons} />
-        </div>
-      ) : null}
     </section>
   );
 }
