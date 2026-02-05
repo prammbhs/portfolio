@@ -18,17 +18,7 @@ function Footer() {
           <div className="space-y-3">
             <h3 className="text-xl font-bold tracking-tight">Paramjit Patel</h3>
             <p className="text-sm leading-6 text-foreground/70">
-              Frontend developer crafting calm, intentional web experiences. See more at
-              <span className="ml-1 inline-flex items-center gap-1 font-semibold">
-                <a
-                  href="https://paramjitpatel.me"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hover:text-foreground"
-                >
-                  paramjitpatel.me
-                </a>
-              </span>
+              “Code is like humor. When you have to explain it, it&apos;s bad.”
             </p>
           </div>
 
@@ -52,12 +42,36 @@ function Footer() {
             <p className="text-sm leading-6 text-foreground/70">
               Ready to collaborate or have a question? Jump to the contact page and drop a note.
             </p>
-            <a
-              href="#contact"
-              className="inline-flex w-fit items-center justify-center rounded-md bg-foreground px-4 py-2 text-sm font-semibold text-background transition hover:opacity-90"
-            >
-              Contact
-            </a>
+            <div className="flex flex-wrap items-center gap-3">
+              <a
+                href="#contact"
+                className="inline-flex w-fit items-center justify-center rounded-md bg-foreground px-4 py-2 text-sm font-semibold text-background transition hover:opacity-90"
+              >
+                Contact
+              </a>
+              <a
+                href="https://github.com/ParamjitPatel"
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm font-semibold text-foreground/70 hover:text-foreground"
+              >
+                GitHub
+              </a>
+              <a
+                href="mailto:paramjeetpatelmbhs+portfolio@gmail.com"
+                className="text-sm font-semibold text-foreground/70 hover:text-foreground"
+              >
+                Email
+              </a>
+              <a
+                href="https://www.linkedin.com/in/paramjitpatel"
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm font-semibold text-foreground/70 hover:text-foreground"
+              >
+                LinkedIn
+              </a>
+            </div>
           </div>
         </div>
 

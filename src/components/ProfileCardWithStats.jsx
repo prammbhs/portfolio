@@ -6,7 +6,7 @@ import {
   siGeeksforgeeks,
   siHackerrank,
   siCodeforces,
-} from "simple-icons/icons";
+} from "simple-icons";
 
 const UI = {
   colors: {

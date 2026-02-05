@@ -1,18 +1,53 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchProfile, fetchPlatformData } from "../lib/cosmicClient";
+import { fetchAllObjects } from "../lib/cosmicClient";
 
-const CODOLIO_USER_KEY = "Paramjit_Patel";
+const GITHUB_USER = "prammbhs";
+const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN;
 
-async function fetchCodolioProfile() {
-  const url = `https://api.codolio.com/github/profile?userKey=${encodeURIComponent(CODOLIO_USER_KEY)}`;
-  const res = await fetch(url, { method: "GET" });
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok || !json?.data) {
-    const msg = json?.status?.message || `${res.status} ${res.statusText}`;
-    throw new Error(`Codolio fetch failed: ${msg}`);
+async function fetchGithubStats() {
+  const userUrl = `https://api.github.com/users/${encodeURIComponent(GITHUB_USER)}`;
+  const reposUrl = `https://api.github.com/users/${encodeURIComponent(GITHUB_USER)}/repos?per_page=100&sort=updated`;
+  const eventsUrl = `https://api.github.com/users/${encodeURIComponent(GITHUB_USER)}/events/public?per_page=100`;
+
+  const headers = {
+    Accept: "application/vnd.github+json",
+    ...(GITHUB_TOKEN ? { Authorization: `Bearer ${GITHUB_TOKEN}` } : {}),
+  };
+
+  const [userRes, reposRes, eventsRes] = await Promise.all([
+    fetch(userUrl, { headers }),
+    fetch(reposUrl, { headers }),
+    fetch(eventsUrl, { headers }),
+  ]);
+
+  const user = await userRes.json().catch(() => ({}));
+  const repos = await reposRes.json().catch(() => []);
+  const events = await eventsRes.json().catch(() => []);
+
+  if (!userRes.ok) {
+    const msg = user?.message || `${userRes.status} ${userRes.statusText}`;
+    throw new Error(`GitHub fetch failed: ${msg}`);
   }
-  return json.data;
+
+  const totalStars = Array.isArray(repos)
+    ? repos.reduce((sum, repo) => sum + (repo?.stargazers_count || 0), 0)
+    : 0;
+
+  const recentContribs = Array.isArray(events)
+    ? events.filter((evt) =>
+        ["PushEvent", "PullRequestEvent", "IssuesEvent", "CreateEvent"].includes(evt?.type)
+      ).length
+    : 0;
+
+  return {
+    handle: user?.login || GITHUB_USER,
+    url: user?.html_url || `https://github.com/${GITHUB_USER}`,
+    followers: user?.followers,
+    publicRepos: user?.public_repos,
+    stars: totalStars,
+    recentContributions: recentContribs,
+  };
 }
 
 function buildSkillIcons(profile) {
@@ -45,14 +80,14 @@ function buildLeetStats(leetcode) {
   };
 }
 
-function buildCodolioStats(codolioData) {
-  if (!codolioData) return null;
+function buildGithubStats(githubData) {
+  if (!githubData) return null;
   return {
-    handle: codolioData.githubProfile,
-    url: codolioData.githubProfile ? `https://github.com/${codolioData.githubProfile}` : null,
-    activeDays: codolioData.totalActiveDays,
-    contributions: codolioData.totalContributions ?? codolioData.commitCounts,
-    stars: codolioData.stars,
+    handle: githubData.handle,
+    url: githubData.url,
+    activeDays: githubData.publicRepos,
+    contributions: githubData.recentContributions,
+    stars: githubData.stars,
   };
 }
 
@@ -90,20 +125,15 @@ function buildPlatformBadges(platformProfiles) {
 }
 
 export function useHomeData() {
-  const { data: profile, isLoading, isError, error } = useQuery({
-    queryKey: ["profile"],
-    queryFn: () => fetchProfile(),
-  });
-
-  const { data: platformData } = useQuery({
-    queryKey: ["platformdata"],
-    queryFn: () => fetchPlatformData(),
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["cosmic-all"],
+    queryFn: () => fetchAllObjects(),
     staleTime: 24 * 60 * 60 * 1000,
   });
 
-  const { data: codolioData } = useQuery({
-    queryKey: ["codolio", CODOLIO_USER_KEY],
-    queryFn: fetchCodolioProfile,
+  const { data: githubData } = useQuery({
+    queryKey: ["github-stats", GITHUB_USER],
+    queryFn: fetchGithubStats,
     staleTime: 6 * 60 * 60 * 1000,
   });
 
@@ -120,6 +150,16 @@ export function useHomeData() {
 
   const pauseAutoRotate = useCallback(() => setAutoRotate(false), []);
 
+  const profile = useMemo(
+    () => (Array.isArray(data) ? data.find((item) => item?.type === "profile") : null),
+    [data]
+  );
+
+  const platformData = useMemo(
+    () => (Array.isArray(data) ? data.find((item) => item?.type === "platformdata") : null),
+    [data]
+  );
+
   const skillIcons = useMemo(() => buildSkillIcons(profile), [profile]);
 
   const leetcode = useMemo(
@@ -129,7 +169,7 @@ export function useHomeData() {
 
   const leetStats = useMemo(() => buildLeetStats(leetcode), [leetcode]);
 
-  const codolioStats = useMemo(() => buildCodolioStats(codolioData), [codolioData]);
+  const githubStats = useMemo(() => buildGithubStats(githubData), [githubData]);
 
   const platformProfiles = platformData?.metadata?.platformdata?.platformProfiles || [];
 
@@ -137,15 +177,15 @@ export function useHomeData() {
 
   const platformBadges = useMemo(() => buildPlatformBadges(platformProfiles), [platformProfiles]);
 
-  const cardView = view === "dsa" ? leetStats : codolioStats;
+  const cardView = view === "dsa" ? leetStats : githubStats;
   const cardUrl = cardView?.url;
-  const devActive = codolioStats?.activeDays ?? "--";
-  const devContrib = codolioStats?.contributions ?? "--";
-  const devProfile = codolioStats?.handle || codolioStats?.url
-    ? { handle: codolioStats?.handle, url: codolioStats?.url, contributions: codolioStats?.contributions }
+  const devActive = githubStats?.activeDays ?? "--";
+  const devContrib = githubStats?.contributions ?? "--";
+  const devProfile = githubStats?.handle || githubStats?.url
+    ? { handle: githubStats?.handle, url: githubStats?.url, contributions: githubStats?.contributions }
     : null;
   const linkedinUrl = "https://www.linkedin.com/in/paramjitpatel";
-  const githubUrl = codolioStats?.url || "https://github.com/ParamjitPatel";
+  const githubUrl = githubStats?.url || "https://github.com/ParamjitPatel";
 
   return {
     profile,
@@ -156,7 +196,7 @@ export function useHomeData() {
     setView,
     pauseAutoRotate,
     leetStats,
-    codolioStats,
+    githubStats,
     platformProfiles,
     dsaTotals,
     platformBadges,

@@ -2,26 +2,29 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ExperienceTimeline from "../components/ExperienceTimeline";
 import SkillIconGrid from "../components/SkillIconGrid";
-import { fetchAbout, fetchExperience, fetchProfile } from "../lib/cosmicClient";
+import { fetchAllObjects } from "../lib/cosmicClient";
 
 function About() {
-  const { data: profile } = useQuery({
-    queryKey: ["profile"],
-    queryFn: () => fetchProfile(),
+  const { data } = useQuery({
+    queryKey: ["cosmic-all"],
+    queryFn: () => fetchAllObjects(),
     staleTime: 24 * 60 * 60 * 1000,
   });
 
-  const { data: about } = useQuery({
-    queryKey: ["about"],
-    queryFn: () => fetchAbout(),
-    staleTime: 24 * 60 * 60 * 1000,
-  });
+  const profile = useMemo(
+    () => (Array.isArray(data) ? data.find((item) => item?.type === "profile") : null),
+    [data]
+  );
 
-  const { data: experienceItems } = useQuery({
-    queryKey: ["experience"],
-    queryFn: () => fetchExperience(),
-    staleTime: 24 * 60 * 60 * 1000,
-  });
+  const about = useMemo(
+    () => (Array.isArray(data) ? data.find((item) => item?.type === "about") : null),
+    [data]
+  );
+
+  const experienceItems = useMemo(
+    () => (Array.isArray(data) ? data.filter((item) => item?.type === "experience") : []),
+    [data]
+  );
 
   const skillIcons = useMemo(() => {
     if (!profile?.metadata) return [];
