@@ -46,7 +46,7 @@ function Navbar() {
           <p className="font-sans">Paramjit Patel</p>
         </a>
 
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden items-center gap-8 min-[900px]:flex">
           {links.map((link) => (
             <a key={link.to} href={link.to} className={navLinkClass} onClick={() => setIsOpen(false)}>
               {link.name}
@@ -66,7 +66,7 @@ function Navbar() {
 
           <button
             type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-foreground transition hover:bg-white/10 md:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-foreground transition hover:bg-white/10 min-[900px]:hidden"
             onClick={() => setIsOpen((prev) => !prev)}
             aria-label="Toggle navigation"
           >
@@ -80,7 +80,7 @@ function Navbar() {
       </div>
 
       {isOpen ? (
-        <div className="bg-background px-4 py-3 md:hidden">
+        <div className="bg-background px-4 py-3 min-[900px]:hidden">
           <div className="flex flex-col gap-3">
             {links.map((link) => (
               <a

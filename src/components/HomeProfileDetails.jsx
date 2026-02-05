@@ -1,6 +1,6 @@
 function HomeProfileDetails({ profile, isLoading, isError, error, linkedinUrl, githubUrl }) {
   return (
-    <div className="order-2 md:col-span-7 md:order-1 md:self-center space-y-8 md:pr-4 md:pt-6">
+    <div className="order-2 min-[900px]:col-span-7 min-[900px]:order-1 min-[900px]:self-center space-y-8 min-[900px]:pr-4 min-[900px]:pt-6">
       {isLoading && !isError && (
         <div className="space-y-2">
           <div className="h-8 w-48 rounded-md bg-foreground/10 animate-pulse" />

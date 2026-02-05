@@ -36,16 +36,6 @@ function Certificates() {
   );
 }
 
-function Skills() {
-  return (
-    <section id="skills" className="mx-auto max-w-5xl px-4 py-12">
-      <h2 className="text-2xl font-semibold text-foreground">Skills</h2>
-      <p className="mt-4 text-foreground/80">
-        Highlight languages, frameworks, and tooling with proficiency levels or years of experience.
-      </p>
-    </section>
-  );
-}
 
 function Badges() {
   return (
@@ -67,7 +57,6 @@ function App() {
         <About />
         <Projects />
         <Certificates />
-        <Skills />
         <Badges />
         <Contact />
       </main>

@@ -3,6 +3,7 @@ const readKey = import.meta.env.VITE_COSMIC_READ_KEY;
 const profileSlug = import.meta.env.VITE_COSMIC_PROFILE_SLUG;
 const platformSlug = import.meta.env.VITE_COSMIC_PLATFORM_SLUG;
 const aboutSlug = import.meta.env.VITE_COSMIC_ABOUT_SLUG;
+const experienceType = import.meta.env.VITE_COSMIC_EXPERIENCE_TYPE;
 const apiBase = "https://api.cosmicjs.com/v3";
 
 export async function fetchProfile(slug = profileSlug) {
@@ -101,5 +102,28 @@ export async function fetchAbout(slug = aboutSlug || "aboutme") {
   if (res2.ok && json2.objects && json2.objects[0]) return json2.objects[0];
 
   const message = json.message || json2.message || `${res.status} ${res.statusText}` || "Unknown Cosmic error";
+  throw new Error(`Cosmic fetch failed: ${message}`);
+}
+
+export async function fetchExperience(type = experienceType || "experience") {
+  if (!bucket) throw new Error("Missing VITE_COSMIC_BUCKET env var");
+  if (!type) throw new Error("Missing experience type. Set VITE_COSMIC_EXPERIENCE_TYPE.");
+
+  const params = new URLSearchParams({
+    props: "slug,title,metadata,type",
+    type,
+    limit: "50",
+    status: "all",
+  });
+  if (readKey) params.set("read_key", readKey);
+
+  const url = new URL(`${apiBase}/buckets/${encodeURIComponent(bucket)}/objects`);
+  url.search = params.toString();
+
+  const res = await fetch(url.toString(), { headers: { Accept: "application/json" }, cache: "no-cache" });
+  const json = await res.json().catch(() => ({}));
+  if (res.ok && Array.isArray(json.objects)) return json.objects;
+
+  const message = json.message || `${res.status} ${res.statusText}` || "Unknown Cosmic error";
   throw new Error(`Cosmic fetch failed: ${message}`);
 }

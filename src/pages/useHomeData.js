@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProfile, fetchPlatformData } from "../lib/cosmicClient";
 
@@ -108,13 +108,17 @@ export function useHomeData() {
   });
 
   const [view, setView] = useState("dsa");
+  const [autoRotate, setAutoRotate] = useState(true);
 
   useEffect(() => {
+    if (!autoRotate) return undefined;
     const id = window.setInterval(() => {
       setView((v) => (v === "dsa" ? "dev" : "dsa"));
     }, 8000);
     return () => window.clearInterval(id);
-  }, []);
+  }, [autoRotate]);
+
+  const pauseAutoRotate = useCallback(() => setAutoRotate(false), []);
 
   const skillIcons = useMemo(() => buildSkillIcons(profile), [profile]);
 
@@ -150,6 +154,7 @@ export function useHomeData() {
     error,
     view,
     setView,
+    pauseAutoRotate,
     leetStats,
     codolioStats,
     platformProfiles,

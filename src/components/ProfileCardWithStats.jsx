@@ -35,7 +35,7 @@ function StatBlock({ label, value, accent, breakdown, onClick, showBreakdown = t
     <Wrapper
       type={clickable ? "button" : undefined}
       onClick={onClick}
-      className={`min-w-0 w-full rounded-xl border border-foreground/10 bg-foreground/5 p-4 shadow-inner dark:border-white/10 dark:bg-black/50 ${
+      className={`min-w-0 w-full rounded-xl border border-foreground/10 bg-foreground/5 p-4 shadow-inner text-left dark:border-white/10 dark:bg-black/50 ${
         clickable
           ? `cursor-pointer border-foreground/30 bg-foreground/5 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 ${hoverExtras} ${
               transitionsDisabled ? "" : "transition"
@@ -49,7 +49,7 @@ function StatBlock({ label, value, accent, breakdown, onClick, showBreakdown = t
         {arrowIcon}
       </div>
       <div className="mt-2 h-px w-full bg-foreground/10" />
-      <div className="mt-3 text-4xl font-extrabold text-foreground sm:text-5xl text-center sm:text-left">{value ?? "--"}</div>
+      <div className="mt-3 text-4xl font-extrabold text-foreground sm:text-5xl text-center">{value ?? "--"}</div>
       {showBreakdown && breakdown ? (
         <div className="mt-4 flex flex-wrap items-center gap-3 text-xs font-semibold text-foreground/70">
           {breakdown.map((item) => (
@@ -80,6 +80,7 @@ function ProfilePanel({
   setShowProfilePopup,
   showBadgesPopup,
   setShowBadgesPopup,
+  onUserInteract,
 }) {
   const [transitionsDisabled, setTransitionsDisabled] = useState(false);
   const transitionResetTimer = useRef();
@@ -154,10 +155,11 @@ function ProfilePanel({
 
   const openPlatformPopup = useCallback(() => {
     if (currentProfiles?.length) {
+      onUserInteract?.();
       startDisableTransitions();
       setShowProfilePopup(true);
     }
-  }, [currentProfiles, startDisableTransitions, setShowProfilePopup]);
+  }, [currentProfiles, onUserInteract, startDisableTransitions, setShowProfilePopup]);
 
   const closePlatformPopup = useCallback(() => {
     setShowProfilePopup(false);
@@ -166,10 +168,11 @@ function ProfilePanel({
 
   const openBadgesPopup = useCallback(() => {
     if (badges?.length) {
+      onUserInteract?.();
       startDisableTransitions();
       setShowBadgesPopup(true);
     }
-  }, [badges, startDisableTransitions, setShowBadgesPopup]);
+  }, [badges, onUserInteract, startDisableTransitions, setShowBadgesPopup]);
 
   const closeBadgesPopup = useCallback(() => {
     setShowBadgesPopup(false);
@@ -182,11 +185,13 @@ function ProfilePanel({
 
   const transitionsLocked = transitionsDisabled || isAnyPopupOpen;
 
-  const statRightForRender = isDsa ? { ...statRight, onClick: badges?.length ? openBadgesPopup : undefined } : statRight;
+  const statRightForRender = isDsa
+    ? { ...statRight, onClick: badges?.length ? openBadgesPopup : undefined }
+    : statRight;
 
   return (
     <div
-      className="relative w-full max-w-md md:max-w-lg overflow-hidden rounded-3xl border border-foreground/12 bg-card p-6 text-foreground shadow-2xl sm:p-7 md:p-8 dark:bg-[#212529]"
+      className="relative w-full max-w-md min-[900px]:max-w-lg overflow-hidden rounded-3xl border border-foreground/12 bg-card p-6 text-foreground shadow-2xl sm:p-7 min-[900px]:p-8 dark:bg-[#212529]"
       style={transitionsLocked ? { transition: "none" } : undefined}
     >
 
@@ -388,6 +393,7 @@ function ProfileCardWithStats({
   name,
   view,
   setView,
+  onUserInteract,
   dsaTotals,
   dsaHandle,
   devHandle,
@@ -426,7 +432,7 @@ function ProfileCardWithStats({
     : { label: "Contributions", value: devContrib ?? "--", accent: UI.colors.statOrange };
 
   return (
-    <div className="relative order-1 space-y-4 md:order-2 md:col-span-5 md:self-start md:-mt-6 w-full flex flex-col items-center">
+    <div className="relative order-1 space-y-4 min-[900px]:order-2 min-[900px]:col-span-5 min-[900px]:self-start min-[900px]:-mt-6 w-full flex flex-col items-center">
       <ProfilePanel
         name={name}
         handle={isDsa ? dsaHandle : devHandle}
@@ -442,36 +448,35 @@ function ProfileCardWithStats({
         setShowProfilePopup={setShowProfilePopup}
         showBadgesPopup={showBadgesPopup}
         setShowBadgesPopup={setShowBadgesPopup}
+        onUserInteract={onUserInteract}
       />
 
-      <div className="flex w-full max-w-md md:max-w-lg gap-3">
+      <div className="flex w-full max-w-md min-[900px]:max-w-lg gap-3">
         <button
           type="button"
           onClick={() => {
-            if (isAnyPopupOpen) return;
+            onUserInteract?.();
             setView("dsa");
           }}
-          disabled={isAnyPopupOpen}
           className={`flex-1 rounded-lg border px-3 py-2 text-sm font-semibold ${
             isDsa
               ? "border-foreground bg-foreground text-background"
               : "border-foreground/20 bg-foreground/5 text-foreground/80 hover:border-foreground/40"
-          } ${isAnyPopupOpen ? "cursor-not-allowed opacity-60" : "transition"}`}
+          } transition`}
         >
           DSA Stats
         </button>
         <button
           type="button"
           onClick={() => {
-            if (isAnyPopupOpen) return;
+            onUserInteract?.();
             setView("dev");
           }}
-          disabled={isAnyPopupOpen}
           className={`flex-1 rounded-lg border px-3 py-2 text-sm font-semibold ${
             !isDsa
               ? "border-foreground bg-foreground text-background"
               : "border-foreground/20 bg-foreground/5 text-foreground/80 hover:border-foreground/40"
-          } ${isAnyPopupOpen ? "cursor-not-allowed opacity-60" : "transition"}`}
+          } transition`}
         >
           Dev Stats
         </button>
