@@ -3,8 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchAllObjects } from "../lib/cosmicClient";
 
 const GITHUB_USER = "prammbhs";
-const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN;
-const GITHUB_API_BASE = import.meta.env.VITE_GITHUB_API_BASE || "https://api.github.com";
 const GITHUB_CACHE_KEY = `github-stats:${GITHUB_USER}`;
 
 function getCachedGithubStats() {
@@ -27,56 +25,15 @@ function setCachedGithubStats(data) {
 }
 
 async function fetchGithubStats() {
-  const userUrl = `${GITHUB_API_BASE}/users/${encodeURIComponent(GITHUB_USER)}`;
-  const reposUrl = `${GITHUB_API_BASE}/users/${encodeURIComponent(GITHUB_USER)}/repos?per_page=100&sort=updated`;
-  const eventsUrl = `${GITHUB_API_BASE}/users/${encodeURIComponent(GITHUB_USER)}/events/public?per_page=100`;
-
-  const headers = {
-    Accept: "application/vnd.github+json",
-    ...(GITHUB_TOKEN ? { Authorization: `Bearer ${GITHUB_TOKEN}` } : {}),
-  };
-
-  let userRes;
-  let reposRes;
-  let eventsRes;
   try {
-    [userRes, reposRes, eventsRes] = await Promise.all([
-      fetch(userUrl, { headers }),
-      fetch(reposUrl, { headers }),
-      fetch(eventsUrl, { headers }),
-    ]);
+    const res = await fetch(`/api/github?username=${encodeURIComponent(GITHUB_USER)}`);
+    if (!res.ok) return getCachedGithubStats();
+    const payload = await res.json();
+    setCachedGithubStats(payload);
+    return payload;
   } catch {
     return getCachedGithubStats();
   }
-
-  const user = await userRes.json().catch(() => ({}));
-  const repos = await reposRes.json().catch(() => []);
-  const events = await eventsRes.json().catch(() => []);
-
-  if (!userRes.ok) {
-    return getCachedGithubStats();
-  }
-
-  const totalStars = Array.isArray(repos)
-    ? repos.reduce((sum, repo) => sum + (repo?.stargazers_count || 0), 0)
-    : 0;
-
-  const recentContribs = Array.isArray(events)
-    ? events.filter((evt) =>
-        ["PushEvent", "PullRequestEvent", "IssuesEvent", "CreateEvent"].includes(evt?.type)
-      ).length
-    : 0;
-
-  const payload = {
-    handle: user?.login || GITHUB_USER,
-    url: user?.html_url || `https://github.com/${GITHUB_USER}`,
-    followers: user?.followers,
-    publicRepos: user?.public_repos,
-    stars: totalStars,
-    recentContributions: recentContribs,
-  };
-  setCachedGithubStats(payload);
-  return payload;
 }
 
 function buildSkillIcons(profile) {

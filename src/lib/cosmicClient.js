@@ -1,7 +1,3 @@
-const bucket = import.meta.env.VITE_COSMIC_BUCKET;
-const readKey = import.meta.env.VITE_COSMIC_READ_KEY;
-const apiBase = "https://api.cosmicjs.com/v3";
-
 const responseCache = new Map();
 const DEFAULT_CACHE_TTL = 5 * 60 * 1000;
 
@@ -28,22 +24,16 @@ async function fetchJsonWithCache(url, { cacheKey = url, ttlMs = DEFAULT_CACHE_T
 }
 
 export async function fetchAllObjects({ limit = 50, skip = 0 } = {}) {
-  if (!bucket) throw new Error("Missing VITE_COSMIC_BUCKET env var");
-
   const params = new URLSearchParams({
-    props: "slug,title,metadata,type",
     limit: String(limit),
     skip: String(skip),
-    status: "all",
   });
-  if (readKey) params.set("read_key", readKey);
 
-  const url = new URL(`${apiBase}/buckets/${encodeURIComponent(bucket)}/objects`);
-  url.search = params.toString();
+  const url = `/api/cosmic?${params.toString()}`;
 
-  const resp = await fetchJsonWithCache(url.toString());
+  const resp = await fetchJsonWithCache(url);
   if (resp.res.ok && Array.isArray(resp.json.objects)) return resp.json.objects;
 
-  const message = resp.json.message || `${resp.res.status} ${resp.res.statusText}` || "Unknown Cosmic error";
+  const message = resp.json.error || resp.json.message || `${resp.res.status} ${resp.res.statusText}` || "Unknown Cosmic error";
   throw new Error(`Cosmic fetch failed: ${message}`);
 }
