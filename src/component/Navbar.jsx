@@ -36,11 +36,11 @@ const links = [
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [theme, setTheme] = useState("dark");
+  const [theme, setTheme] = useState("light");
 
   useEffect(() => {
     const stored = localStorage.getItem("theme");
-    const initial = stored || "dark";
+    const initial = stored || "light";
     setTheme(initial);
     document.documentElement.classList.toggle("dark", initial === "dark");
   }, []);
