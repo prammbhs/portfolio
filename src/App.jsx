@@ -1,11 +1,11 @@
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import Navbar from "./component/Navbar";
-import Footer from "./component/Footer";
 import Home from "./pages/Home";
-import About from "./pages/About";
+const About = lazy(() => import("./pages/About"));
 const ProjectSection = lazy(() => import("./components/ProjectSection"));
 const CertificateSection = lazy(() => import("./components/CertificateSection"));
 const BadgesSection = lazy(() => import("./components/BadgesSection"));
+const Footer = lazy(() => import("./component/Footer"));
 
 function LazySection({ children, fallback, rootMargin = "200px" }) {
   const [isVisible, setIsVisible] = useState(false);
@@ -134,6 +134,7 @@ function Contact() {
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [showSections, setShowSections] = useState(false);
 
   useEffect(() => {
     let rafId;
@@ -156,6 +157,10 @@ function App() {
     return () => cancelAnimationFrame(rafId);
   }, []);
 
+  useEffect(() => {
+    setShowSections(true);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {isLoading ? (
@@ -175,25 +180,39 @@ function App() {
       <Navbar />
       <main>
         <Home />
-        <About />
-        <LazySection fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading projects...</div>}>
-          <Suspense fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading projects...</div>}>
-            <ProjectSection />
-          </Suspense>
-        </LazySection>
-        <LazySection fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading certificates...</div>}>
-          <Suspense fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading certificates...</div>}>
-            <CertificateSection />
-          </Suspense>
-        </LazySection>
-        <LazySection fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading badges...</div>}>
-          <Suspense fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading badges...</div>}>
-            <BadgesSection />
-          </Suspense>
-        </LazySection>
-        <Contact />
+        {showSections ? (
+          <>
+            <LazySection fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading about...</div>}>
+              <Suspense fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading about...</div>}>
+                <About />
+              </Suspense>
+            </LazySection>
+            <LazySection fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading projects...</div>}>
+              <Suspense fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading projects...</div>}>
+                <ProjectSection />
+              </Suspense>
+            </LazySection>
+            <LazySection fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading certificates...</div>}>
+              <Suspense fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading certificates...</div>}>
+                <CertificateSection />
+              </Suspense>
+            </LazySection>
+            <LazySection fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading badges...</div>}>
+              <Suspense fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading badges...</div>}>
+                <BadgesSection />
+              </Suspense>
+            </LazySection>
+            <LazySection fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading contact...</div>}>
+              <Contact />
+            </LazySection>
+          </>
+        ) : null}
       </main>
-      <Footer />
+      {showSections ? (
+        <Suspense fallback={<div className="mx-auto max-w-5xl px-4 py-6 text-sm text-foreground/70">Loading footer...</div>}>
+          <Footer />
+        </Suspense>
+      ) : null}
     </div>
   );
 }
