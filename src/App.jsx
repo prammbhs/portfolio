@@ -1,4 +1,5 @@
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import Navbar from "./component/Navbar";
 import Home from "./pages/Home";
 const About = lazy(() => import("./pages/About"));
@@ -29,6 +30,7 @@ function LazySection({ children, fallback, rootMargin = "0px" }) {
   return (
     <div ref={ref}>
       {isVisible ? children : fallback}
+      <Analytics />
     </div>
   );
 }
