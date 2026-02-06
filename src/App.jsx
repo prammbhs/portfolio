@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import Navbar from "./component/Navbar";
 import Home from "./pages/Home";
 const About = lazy(() => import("./pages/About"));
@@ -250,6 +251,7 @@ function App() {
           </Suspense>
         </LazySection>
       ) : null}
+      <SpeedInsights />
     </div>
   );
 }
