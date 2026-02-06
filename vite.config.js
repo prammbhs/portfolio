@@ -15,4 +15,11 @@ export default defineConfig({
       "@": path.resolve(_dirname, "./src"),
     },
   },
+  server: {
+    hmr: {
+      protocol: "ws",
+      host: "localhost",
+      clientPort: 5173,
+    },
+  },
 })

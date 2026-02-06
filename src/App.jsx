@@ -7,7 +7,7 @@ const CertificateSection = lazy(() => import("./components/CertificateSection"))
 const BadgesSection = lazy(() => import("./components/BadgesSection"));
 const Footer = lazy(() => import("./component/Footer"));
 
-function LazySection({ children, fallback, rootMargin = "200px" }) {
+function LazySection({ children, fallback, rootMargin = "0px" }) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef(null);
 
@@ -158,7 +158,22 @@ function App() {
   }, []);
 
   useEffect(() => {
-    setShowSections(true);
+    let idleId;
+    if (typeof window !== "undefined") {
+      if ("requestIdleCallback" in window) {
+        idleId = window.requestIdleCallback(() => setShowSections(true), { timeout: 2500 });
+      } else {
+        const timer = window.setTimeout(() => setShowSections(true), 1500);
+        idleId = () => window.clearTimeout(timer);
+      }
+    }
+    return () => {
+      if (typeof idleId === "number" && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleId);
+      } else if (typeof idleId === "function") {
+        idleId();
+      }
+    };
   }, []);
 
   return (
@@ -182,36 +197,56 @@ function App() {
         <Home />
         {showSections ? (
           <>
-            <LazySection fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading about...</div>}>
+            <LazySection
+              rootMargin="0px"
+              fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading about...</div>}
+            >
               <Suspense fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading about...</div>}>
                 <About />
               </Suspense>
             </LazySection>
-            <LazySection fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading projects...</div>}>
+            <LazySection
+              rootMargin="0px"
+              fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading projects...</div>}
+            >
               <Suspense fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading projects...</div>}>
                 <ProjectSection />
               </Suspense>
             </LazySection>
-            <LazySection fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading certificates...</div>}>
+            <LazySection
+              rootMargin="0px"
+              fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading certificates...</div>}
+            >
               <Suspense fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading certificates...</div>}>
                 <CertificateSection />
               </Suspense>
             </LazySection>
-            <LazySection fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading badges...</div>}>
+            <LazySection
+              rootMargin="0px"
+              fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading badges...</div>}
+            >
               <Suspense fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading badges...</div>}>
                 <BadgesSection />
               </Suspense>
             </LazySection>
-            <LazySection fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading contact...</div>}>
+            <LazySection
+              rootMargin="0px"
+              fallback={<div className="mx-auto max-w-5xl px-4 py-12 text-sm text-foreground/70">Loading contact...</div>}
+            >
               <Contact />
             </LazySection>
           </>
         ) : null}
       </main>
       {showSections ? (
-        <Suspense fallback={<div className="mx-auto max-w-5xl px-4 py-6 text-sm text-foreground/70">Loading footer...</div>}>
-          <Footer />
-        </Suspense>
+        <LazySection
+          rootMargin="0px"
+          fallback={<div className="mx-auto max-w-5xl px-4 py-6 text-sm text-foreground/70">Loading footer...</div>}
+        >
+          <Suspense fallback={<div className="mx-auto max-w-5xl px-4 py-6 text-sm text-foreground/70">Loading footer...</div>}>
+            <Footer />
+          </Suspense>
+        </LazySection>
       ) : null}
     </div>
   );

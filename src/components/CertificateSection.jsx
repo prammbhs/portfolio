@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useCertificates } from "../hooks/useCertificates";
-import { SquareMousePointer } from "lucide-react";
 import { buttonVariants } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import {
@@ -10,6 +9,18 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "./ui/carousel";
+import { getImgixSrcSet, getImgixUrl } from "../lib/utils";
+
+function SquareMousePointerIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path
+        d="M21.18 15.96a1 1 0 0 1-1.33.3l-4.88-2.76-1.73 4.62a1 1 0 0 1-.94.65 1 1 0 0 1-.95-.63l-4.6-12.06a1 1 0 0 1 1.3-1.3l12.06 4.6a1 1 0 0 1-.02 1.88l-4.64 1.72 2.75 4.98Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
 
 const BREAKPOINTS = [
   { min: 1400, count: 5 },
@@ -40,6 +51,8 @@ function CertificateModal({ certificate, onClose }) {
   if (!certificate) return null;
   const meta = certificate.metadata || {};
   const imageUrl = meta.certificate_image?.imgix_url || meta.certificate_image?.url;
+  const imageSrc = getImgixUrl(imageUrl, { w: 1400, q: 60 });
+  const imageSrcSet = getImgixSrcSet(imageUrl, [800, 1000, 1200, 1400, 1600], { q: 60 });
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -66,10 +79,15 @@ function CertificateModal({ certificate, onClose }) {
         <div className="flex max-h-[70vh] items-center justify-center overflow-hidden rounded-xl border border-foreground/10 bg-foreground/5 p-2">
           {imageUrl ? (
             <img
-              src={imageUrl}
+              src={imageSrc}
+              srcSet={imageSrcSet}
+              sizes="(min-width: 1024px) 70vw, 100vw"
               alt={meta.certificate_name || certificate.title}
               className="max-h-[65vh] w-full object-contain"
               loading="lazy"
+              decoding="async"
+              width="1400"
+              height="900"
             />
           ) : (
             <div className="flex h-64 w-full items-center justify-center text-sm text-foreground/60">
@@ -85,6 +103,8 @@ function CertificateModal({ certificate, onClose }) {
 function CertificateCard({ certificate, onView, className = "", imageClassName = "" }) {
   const meta = certificate.metadata || {};
   const imageUrl = meta.certificate_image?.imgix_url || meta.certificate_image?.url;
+  const imageSrc = getImgixUrl(imageUrl, { w: 600, q: 60 });
+  const imageSrcSet = getImgixSrcSet(imageUrl, [320, 480, 600, 800], { q: 60 });
   const title = meta.certificate_name || certificate.title;
   const org = meta.issuing_organization;
   const date = meta.issue_date;
@@ -99,7 +119,17 @@ function CertificateCard({ certificate, onView, className = "", imageClassName =
       <CardContent className="space-y-4">
         <div className={`flex items-center justify-center overflow-hidden rounded-xl border border-foreground/10 bg-foreground/5 ${imageClassName}`}>
           {imageUrl ? (
-            <img src={imageUrl} alt={title} className="h-full w-full object-contain" loading="lazy" />
+            <img
+              src={imageSrc}
+              srcSet={imageSrcSet}
+              sizes="(min-width: 1200px) 20vw, (min-width: 768px) 33vw, 100vw"
+              alt={title}
+              className="h-full w-full object-contain"
+              loading="lazy"
+              decoding="async"
+              width="600"
+              height="400"
+            />
           ) : (
             <span className="text-xs text-foreground/60">No image</span>
           )}
@@ -131,7 +161,7 @@ function CertificateCard({ certificate, onView, className = "", imageClassName =
               rel="noreferrer"
             >
               <span>Verify</span>
-              <SquareMousePointer className="h-4 w-4" aria-hidden />
+              <SquareMousePointerIcon className="h-4 w-4" />
             </a>
           ) : null}
         </div>

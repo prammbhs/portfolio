@@ -4,6 +4,7 @@ import { Badge } from "./ui/badge";
 import { buttonVariants } from "./ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Separator } from "./ui/separator";
+import { getImgixSrcSet, getImgixUrl } from "../lib/utils";
 
 function ProjectCard({ project, isVisible, variant = "stack" }) {
   const meta = project.metadata || {};
@@ -16,6 +17,9 @@ function ProjectCard({ project, isVisible, variant = "stack" }) {
   const images = featuredImage ? [featuredImage, ...galleryImages.filter((url) => url !== featuredImage)] : galleryImages;
   const isStack = variant === "stack";
   const [imageIndex, setImageIndex] = useState(0);
+  const imageUrl = images[imageIndex];
+  const imageSrc = getImgixUrl(imageUrl, { w: 1200, q: 60 });
+  const imageSrcSet = getImgixSrcSet(imageUrl, [480, 768, 1024, 1280, 1600], { q: 60 });
 
   useEffect(() => {
     setImageIndex(0);
@@ -81,8 +85,14 @@ function ProjectCard({ project, isVisible, variant = "stack" }) {
                 <div className="group relative w-full overflow-hidden rounded-xl border border-foreground/10 bg-foreground/5">
                   <div className="flex aspect-[16/9] items-center justify-center">
                     <img
-                      src={images[imageIndex]}
+                      src={imageSrc}
+                      srcSet={imageSrcSet}
+                      sizes="(min-width: 1024px) 50vw, 100vw"
                       alt={meta.project_name || project.title}
+                      width="1280"
+                      height="720"
+                      loading="lazy"
+                      decoding="async"
                       className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-[1.02]"
                     />
                   </div>

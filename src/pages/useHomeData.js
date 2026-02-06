@@ -4,30 +4,57 @@ import { fetchAllObjects } from "../lib/cosmicClient";
 
 const GITHUB_USER = "prammbhs";
 const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN;
+const GITHUB_API_BASE = import.meta.env.VITE_GITHUB_API_BASE || "https://api.github.com";
+const GITHUB_CACHE_KEY = `github-stats:${GITHUB_USER}`;
+
+function getCachedGithubStats() {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(GITHUB_CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedGithubStats(data) {
+  if (typeof window === "undefined" || !data) return;
+  try {
+    window.localStorage.setItem(GITHUB_CACHE_KEY, JSON.stringify(data));
+  } catch {
+    // ignore storage errors
+  }
+}
 
 async function fetchGithubStats() {
-  const userUrl = `https://api.github.com/users/${encodeURIComponent(GITHUB_USER)}`;
-  const reposUrl = `https://api.github.com/users/${encodeURIComponent(GITHUB_USER)}/repos?per_page=100&sort=updated`;
-  const eventsUrl = `https://api.github.com/users/${encodeURIComponent(GITHUB_USER)}/events/public?per_page=100`;
+  const userUrl = `${GITHUB_API_BASE}/users/${encodeURIComponent(GITHUB_USER)}`;
+  const reposUrl = `${GITHUB_API_BASE}/users/${encodeURIComponent(GITHUB_USER)}/repos?per_page=100&sort=updated`;
+  const eventsUrl = `${GITHUB_API_BASE}/users/${encodeURIComponent(GITHUB_USER)}/events/public?per_page=100`;
 
   const headers = {
     Accept: "application/vnd.github+json",
     ...(GITHUB_TOKEN ? { Authorization: `Bearer ${GITHUB_TOKEN}` } : {}),
   };
 
-  const [userRes, reposRes, eventsRes] = await Promise.all([
-    fetch(userUrl, { headers }),
-    fetch(reposUrl, { headers }),
-    fetch(eventsUrl, { headers }),
-  ]);
+  let userRes;
+  let reposRes;
+  let eventsRes;
+  try {
+    [userRes, reposRes, eventsRes] = await Promise.all([
+      fetch(userUrl, { headers }),
+      fetch(reposUrl, { headers }),
+      fetch(eventsUrl, { headers }),
+    ]);
+  } catch {
+    return getCachedGithubStats();
+  }
 
   const user = await userRes.json().catch(() => ({}));
   const repos = await reposRes.json().catch(() => []);
   const events = await eventsRes.json().catch(() => []);
 
   if (!userRes.ok) {
-    const msg = user?.message || `${userRes.status} ${userRes.statusText}`;
-    throw new Error(`GitHub fetch failed: ${msg}`);
+    return getCachedGithubStats();
   }
 
   const totalStars = Array.isArray(repos)
@@ -40,7 +67,7 @@ async function fetchGithubStats() {
       ).length
     : 0;
 
-  return {
+  const payload = {
     handle: user?.login || GITHUB_USER,
     url: user?.html_url || `https://github.com/${GITHUB_USER}`,
     followers: user?.followers,
@@ -48,6 +75,8 @@ async function fetchGithubStats() {
     stars: totalStars,
     recentContributions: recentContribs,
   };
+  setCachedGithubStats(payload);
+  return payload;
 }
 
 function buildSkillIcons(profile) {
@@ -125,16 +154,43 @@ function buildPlatformBadges(platformProfiles) {
 }
 
 export function useHomeData() {
+  const [shouldFetchGithub, setShouldFetchGithub] = useState(false);
+
+  useEffect(() => {
+    let idleId;
+    if (typeof window !== "undefined") {
+      if ("requestIdleCallback" in window) {
+        idleId = window.requestIdleCallback(() => setShouldFetchGithub(true), { timeout: 2500 });
+      } else {
+        const timer = window.setTimeout(() => setShouldFetchGithub(true), 1500);
+        idleId = () => window.clearTimeout(timer);
+      }
+    }
+    return () => {
+      if (typeof idleId === "number" && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleId);
+      } else if (typeof idleId === "function") {
+        idleId();
+      }
+    };
+  }, []);
+
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["cosmic-all"],
     queryFn: () => fetchAllObjects(),
     staleTime: 24 * 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const { data: githubData } = useQuery({
     queryKey: ["github-stats", GITHUB_USER],
     queryFn: fetchGithubStats,
+    enabled: shouldFetchGithub,
+    initialData: () => getCachedGithubStats() || undefined,
     staleTime: 6 * 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    retry: 1,
+    retryDelay: 1500,
   });
 
   const [view, setView] = useState("dsa");

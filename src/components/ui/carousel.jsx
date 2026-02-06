@@ -1,7 +1,34 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "../../lib/utils";
+
+function ChevronLeftIcon({ className = "h-5 w-5" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path
+        d="M15 6L9 12l6 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ChevronRightIcon({ className = "h-5 w-5" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path
+        d="M9 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 const CarouselContext = createContext(null);
 
@@ -121,7 +148,7 @@ function CarouselPrevious({ className, ...props }) {
       aria-label="Previous slide"
       {...props}
     >
-      <ChevronLeft className="h-5 w-5" />
+      <ChevronLeftIcon className="h-5 w-5" />
     </button>
   );
 }
@@ -140,7 +167,7 @@ function CarouselNext({ className, ...props }) {
       aria-label="Next slide"
       {...props}
     >
-      <ChevronRight className="h-5 w-5" />
+      <ChevronRightIcon className="h-5 w-5" />
     </button>
   );
 }

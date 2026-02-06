@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { SquareMousePointer } from "lucide-react";
 import {
   siLeetcode,
   siGithub,
@@ -7,6 +6,17 @@ import {
   siHackerrank,
   siCodeforces,
 } from "simple-icons";
+
+function SquareMousePointerIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
+      <path
+        d="M21.18 15.96a1 1 0 0 1-1.33.3l-4.88-2.76-1.73 4.62a1 1 0 0 1-.94.65 1 1 0 0 1-.95-.63l-4.6-12.06a1 1 0 0 1 1.3-1.3l12.06 4.6a1 1 0 0 1-.02 1.88l-4.64 1.72 2.75 4.98Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
 
 const UI = {
   colors: {
@@ -29,7 +39,7 @@ function StatBlock({ label, value, accent, breakdown, onClick, showBreakdown = t
   const labelClass = clickable ? UI.colors.badgeLabel : accent;
   const hoverExtras = transitionsDisabled ? "" : "hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/60";
   const arrowIcon = clickable ? (
-    <SquareMousePointer className={`h-4 w-4 ${UI.colors.badgeArrow}`} aria-hidden />
+    <SquareMousePointerIcon className={`h-4 w-4 ${UI.colors.badgeArrow}`} />
   ) : null;
   return (
     <Wrapper
@@ -220,7 +230,7 @@ function ProfilePanel({
               style={transitionsLocked ? { transition: "none", transform: "none" } : undefined}
             >
               <span>View platforms profile</span>
-              <SquareMousePointer className={`h-4 w-4 ${UI.colors.profileArrow}`} aria-hidden />
+              <SquareMousePointerIcon className={`h-4 w-4 ${UI.colors.profileArrow}`} />
               <span className="text-emerald-400">●</span>
             </button>
           ) : null}

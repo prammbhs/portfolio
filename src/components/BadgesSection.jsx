@@ -17,6 +17,7 @@ import {
   siLeetcode,
   siUdemy,
 } from "simple-icons";
+import { getImgixSrcSet, getImgixUrl } from "../lib/utils";
 
 
 function renderPlatformLogo(platform, className = "h-8 w-8") {
@@ -49,6 +50,10 @@ function CmsBadgeCard({ badge }) {
   const platform = meta.issuing_platform;
   const date = meta.earned_date;
   const imageUrl = meta.badge_image?.imgix_url;
+  const largeBadgeSrc = getImgixUrl(imageUrl, { w: 112, q: 60 });
+  const largeBadgeSrcSet = getImgixSrcSet(imageUrl, [56, 112, 168], { q: 60 });
+  const smallBadgeSrc = getImgixUrl(imageUrl, { w: 32, q: 60 });
+  const smallBadgeSrcSet = getImgixSrcSet(imageUrl, [24, 32, 48], { q: 60 });
   const rating = meta.star_rating || meta.rating || "--";
   const href = meta.badge_url;
   const Wrapper = href ? "a" : "div";
@@ -78,7 +83,17 @@ function CmsBadgeCard({ badge }) {
                     <div className="pointer-events-none absolute left-1/2 top-0 z-10 w-56 -translate-x-1/2 -translate-y-[115%] rounded-2xl border border-foreground/10 bg-background/95 p-6 opacity-0 shadow-2xl transition-opacity duration-200 group-hover:opacity-100">
                       <div className="flex items-center justify-center">
                         {imageUrl ? (
-                          <img src={imageUrl} alt={title} className="h-28 w-28 object-contain" loading="lazy" />
+                          <img
+                            src={largeBadgeSrc}
+                            srcSet={largeBadgeSrcSet}
+                            sizes="112px"
+                            alt={title}
+                            className="h-28 w-28 object-contain"
+                            loading="lazy"
+                            decoding="async"
+                            width="112"
+                            height="112"
+                          />
                         ) : (
                           renderPlatformLogo(platform, "h-28 w-28") || <span className="text-xs text-foreground/60">Logo</span>
                         )}
@@ -87,7 +102,17 @@ function CmsBadgeCard({ badge }) {
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background text-foreground shadow-sm">
               {imageUrl ? (
-                <img src={imageUrl} alt={title} className="h-8 w-8 object-contain" loading="lazy" />
+                <img
+                  src={smallBadgeSrc}
+                  srcSet={smallBadgeSrcSet}
+                  sizes="32px"
+                  alt={title}
+                  className="h-8 w-8 object-contain"
+                  loading="lazy"
+                  decoding="async"
+                  width="32"
+                  height="32"
+                />
               ) : (
                 renderPlatformLogo(platform) || <span className="text-xs text-foreground/60">Logo</span>
               )}
@@ -112,6 +137,10 @@ function CmsBadgeCard({ badge }) {
 
 function CardBadge({ badge }) {
   const href = badge.url;
+  const largeBadgeSrc = getImgixUrl(badge.icon, { w: 112, q: 60 });
+  const largeBadgeSrcSet = getImgixSrcSet(badge.icon, [56, 112, 168], { q: 60 });
+  const smallBadgeSrc = getImgixUrl(badge.icon, { w: 32, q: 60 });
+  const smallBadgeSrcSet = getImgixSrcSet(badge.icon, [24, 32, 48], { q: 60 });
   const Wrapper = href ? "a" : "div";
   return (
     <Card className="group border-foreground/10 bg-card shadow-sm dark:bg-[#212529]">
@@ -138,7 +167,17 @@ function CardBadge({ badge }) {
                     <div className="pointer-events-none absolute left-1/2 top-0 z-10 w-56 -translate-x-1/2 -translate-y-[115%] rounded-2xl border border-foreground/10 bg-background/95 p-6 opacity-0 shadow-2xl transition-opacity duration-200 group-hover:opacity-100">
                       <div className="flex items-center justify-center">
                         {badge.icon ? (
-                          <img src={badge.icon} alt={badge.name} className="h-28 w-28 object-contain" loading="lazy" />
+                          <img
+                            src={largeBadgeSrc}
+                            srcSet={largeBadgeSrcSet}
+                            sizes="112px"
+                            alt={badge.name}
+                            className="h-28 w-28 object-contain"
+                            loading="lazy"
+                            decoding="async"
+                            width="112"
+                            height="112"
+                          />
                         ) : (
                           renderPlatformLogo(badge.platform, "h-28 w-28") || <span className="text-xs text-foreground/60">Logo</span>
                         )}
@@ -147,7 +186,17 @@ function CardBadge({ badge }) {
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background text-foreground shadow-sm">
               {badge.icon ? (
-                <img src={badge.icon} alt={badge.name} className="h-8 w-8 object-contain" loading="lazy" />
+                <img
+                  src={smallBadgeSrc}
+                  srcSet={smallBadgeSrcSet}
+                  sizes="32px"
+                  alt={badge.name}
+                  className="h-8 w-8 object-contain"
+                  loading="lazy"
+                  decoding="async"
+                  width="32"
+                  height="32"
+                />
               ) : (
                 renderPlatformLogo(badge.platform) || <span className="text-xs text-foreground/60">Logo</span>
               )}
