@@ -44,8 +44,14 @@ function Contact() {
     event.preventDefault();
     setStatus({ type: "", message: "" });
     setIsSubmitting(true);
+    const form = event.currentTarget;
+    if (!form) {
+      setStatus({ type: "error", message: "Something went wrong. Please try again later." });
+      setIsSubmitting(false);
+      return;
+    }
 
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(form);
 
     try {
       const response = await fetch("https://formsubmit.co/ajax/paramjeetpatelmbhs@gmail.com", {
@@ -58,7 +64,7 @@ function Contact() {
       const data = await response.json();
       if (data.success === "true" || data.success === true) {
         setStatus({ type: "success", message: "Thanks! Your message has been sent." });
-        event.currentTarget.reset();
+        form.reset();
       } else {
         setStatus({ type: "error", message: "Something went wrong. Please try again later." });
       }
