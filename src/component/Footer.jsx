@@ -50,7 +50,7 @@ function Footer() {
                 Contact
               </a>
               <a
-                href="https://github.com/ParamjitPatel"
+                href="https://github.com/prammbhs"
                 target="_blank"
                 rel="noreferrer"
                 className="text-sm font-semibold text-foreground/70 hover:text-foreground"
