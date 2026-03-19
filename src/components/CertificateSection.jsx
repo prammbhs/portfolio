@@ -10,6 +10,7 @@ import {
   CarouselPrevious,
 } from "./ui/carousel";
 import { getImgixSrcSet, getImgixUrl } from "../lib/utils";
+import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures';
 
 function SquareMousePointerIcon({ className = "h-4 w-4" }) {
   return (
@@ -277,6 +278,7 @@ function CertificateSection() {
         className="relative"
         setApi={setCarouselApi}
         opts={{ align: "start", loop: true }}
+        plugins={[WheelGesturesPlugin()]}
       >
         <CarouselContent className="cursor-auto">
           {certificates.map((certificate) => (

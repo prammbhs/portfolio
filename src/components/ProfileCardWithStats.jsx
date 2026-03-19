@@ -20,57 +20,35 @@ function SquareMousePointerIcon({ className = "h-4 w-4" }) {
 
 const UI = {
   colors: {
-    badgeLabel: "text-foreground",
-    badgeArrow: "text-foreground",
-    profileArrow: "text-current",
-    statGreen: "text-foreground",
-    statOrange: "text-foreground",
-  },
-  classes: {
-    profileButton:
-      "inline-flex items-center gap-2 rounded-full bg-black px-4 py-2 text-sm font-semibold text-white shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-foreground/40 focus:ring-offset-background dark:bg-white dark:text-black",
+    statGreen: "text-emerald-500",
+    statOrange: "text-amber-500",
   },
   transitionDelayMs: 2000,
 };
 
-function StatBlock({ label, value, accent, breakdown, onClick, showBreakdown = true, transitionsDisabled }) {
+function StatBlock({ label, value, accent, onClick, transitionsDisabled }) {
   const clickable = Boolean(onClick);
   const Wrapper = clickable ? "button" : "div";
-  const labelClass = clickable ? UI.colors.badgeLabel : accent;
   const hoverExtras = transitionsDisabled ? "" : "hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/60";
-  const arrowIcon = clickable ? (
-    <SquareMousePointerIcon className={`h-4 w-4 ${UI.colors.badgeArrow}`} />
-  ) : null;
+  
   return (
     <Wrapper
       type={clickable ? "button" : undefined}
       onClick={onClick}
-      className={`min-w-0 w-full rounded-xl border border-foreground/10 bg-foreground/5 p-4 shadow-inner text-left dark:border-white/10 dark:bg-black/50 ${
+      className={`min-w-0 w-full rounded-xl border border-foreground/10 bg-foreground/5 p-4 shadow-inner text-left dark:border-white/10 dark:bg-neutral-800/40 flex flex-col justify-center items-center ${
         clickable
-          ? `cursor-pointer border-foreground/30 bg-foreground/5 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 ${hoverExtras} ${
+          ? `cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 ${hoverExtras} ${
               transitionsDisabled ? "" : "transition"
             }`
           : ""
       }`}
       style={transitionsDisabled ? { transition: "none", transform: "none" } : undefined}
     >
-      <div className={`text-base font-semibold flex items-center gap-2 ${labelClass}`}>
-        <span>{label}</span>
-        {arrowIcon}
+      <div className={`text-base min-[900px]:text-sm font-semibold ${accent}`}>
+        {label}
       </div>
       <div className="mt-2 h-px w-full bg-foreground/10" />
-      <div className="mt-3 text-4xl font-extrabold text-foreground sm:text-5xl text-center">{value ?? "--"}</div>
-      {showBreakdown && breakdown ? (
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs font-semibold text-foreground/70">
-          {breakdown.map((item) => (
-            <div key={item.label} className="flex items-center gap-2">
-              <span className={`inline-block h-2 w-2 rounded-full ${item.dot}`} aria-hidden />
-              <span>{item.label}</span>
-              <span className="text-foreground font-bold text-sm">{item.value}</span>
-            </div>
-          ))}
-        </div>
-      ) : null}
+      <div className="mt-3 text-4xl font-extrabold text-foreground sm:text-5xl min-[900px]:text-4xl min-[900px]:mt-2">{value ?? "--"}</div>
     </Wrapper>
   );
 }
@@ -80,7 +58,7 @@ function ProfilePanel({
   handle,
   statLeft,
   statRight,
-  tags = [],
+  displayTags = [],
   linkUrl,
   platformProfiles = [],
   badges = [],
@@ -201,70 +179,89 @@ function ProfilePanel({
 
   return (
     <div
-      className="relative w-full max-w-md min-[900px]:max-w-lg overflow-hidden rounded-3xl border border-foreground/12 bg-card p-6 text-foreground shadow-2xl sm:p-7 min-[900px]:p-8 dark:bg-[#212529]"
+      className="relative w-full max-w-md min-[900px]:max-w-[420px] overflow-hidden mx-auto min-[900px]:ml-auto min-[900px]:mx-0 rounded-3xl border border-foreground/12 bg-card p-6 text-foreground shadow-2xl sm:p-7 min-[900px]:p-6 dark:bg-[#212529]"
       style={transitionsLocked ? { transition: "none" } : undefined}
     >
 
-      <div className="flex items-center justify-between text-sm font-semibold tracking-wide text-foreground/70">
-        <span className="text-xs uppercase tracking-[0.3em] text-foreground/60">Card</span>
-        
-      </div>
-
-      <div className="mt-6 flex flex-col items-center gap-3 text-center">
+      <div className="mt-2 flex flex-col items-center gap-3 min-[900px]:gap-2 text-center">
         <div className="relative">
-          <div className="flex h-40 w-40 items-center justify-center rounded-full border-4 border-foreground/20 bg-white text-6xl font-black text-black shadow-2xl dark:bg-black dark:text-white" aria-hidden>
+          <div className="flex h-36 w-36 min-[900px]:h-28 min-[900px]:w-28 items-center justify-center rounded-full border-[3px] border-[#FFA116] bg-foreground/5 text-6xl min-[900px]:text-5xl font-black text-foreground shadow-xl dark:bg-neutral-800" aria-hidden>
             {initial}
           </div>
         </div>
         <div className="space-y-1">
-          <h2 className="text-3xl font-extrabold tracking-tight">{name}</h2>
+          <h2 className="text-3xl min-[900px]:text-2xl font-bold tracking-tight text-foreground flex items-center justify-center gap-2">
+            {name}
+            <svg viewBox="0 0 24 24" className="h-6 w-6 min-[900px]:h-5 min-[900px]:w-5 text-emerald-500" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+          </h2>
           {handle ? (
-            <button
-              type="button"
-              onClick={openPlatformPopup}
-              aria-haspopup="dialog"
-              aria-expanded={showProfilePopup}
-              className={`${UI.classes.profileButton} ${
-                transitionsLocked ? "" : "transition hover:-translate-y-0.5 hover:shadow-xl"
-              }`}
-              style={transitionsLocked ? { transition: "none", transform: "none" } : undefined}
-            >
-              <span>View platforms profile</span>
-              <SquareMousePointerIcon className={`h-4 w-4 ${UI.colors.profileArrow}`} />
-              <span className="text-emerald-400">●</span>
-            </button>
+            <div className="inline-flex rounded-full bg-[#514332] px-4 py-1.5 min-[900px]:py-1 text-sm min-[900px]:text-xs font-semibold text-[#F3D3B1]">
+              @{handle}
+            </div>
           ) : null}
         </div>
       </div>
 
-      <div className="mt-6 grid gap-3 rounded-2xl border border-foreground/10 bg-foreground/5 p-4 shadow-inner sm:grid-cols-2 dark:bg-neutral-900/60">
+      <div className="mt-6 min-[900px]:mt-4 grid gap-3 min-[900px]:gap-2 rounded-2xl border border-foreground/10 bg-foreground/5 p-3 shadow-inner sm:grid-cols-2 dark:bg-neutral-900/60">
         <StatBlock
           label={statLeft.label}
           value={statLeft.value}
           accent={statLeft.accent}
-          breakdown={statLeft.breakdown}
-          showBreakdown={false}
           transitionsDisabled={transitionsLocked}
         />
         <StatBlock
-          label={statRightForRender.label}
-          value={statRightForRender.value}
-          accent={statRightForRender.accent}
-          breakdown={statRightForRender.breakdown}
-          onClick={statRightForRender.onClick}
+          label={statRight.label}
+          value={statRight.value}
+          accent={statRight.accent}
           transitionsDisabled={transitionsLocked}
         />
       </div>
 
-      {isDsa && statLeft.breakdown ? (
-        <div className="mt-2 flex flex-wrap items-center gap-4 text-sm font-semibold text-foreground/80">
-          {statLeft.breakdown.map((item) => (
-            <div key={item.label} className="flex items-center gap-2">
-              <span className={`inline-block h-2.5 w-2.5 rounded-full ${item.dot}`} aria-hidden />
-              <span>{item.label}</span>
-              <span className="text-foreground font-bold">{item.value}</span>
-            </div>
-          ))}
+      <div className="mt-4 min-[900px]:mt-3 rounded-xl border border-foreground/10 bg-foreground/5 p-4 min-[900px]:p-3 text-center dark:bg-neutral-900/60 shadow-inner">
+        <div className="text-sm min-[900px]:text-xs font-bold text-foreground/60 mb-3 min-[900px]:mb-2">You can find me on ...</div>
+        <div className="flex items-center justify-center gap-4 min-[900px]:gap-3">
+          {currentProfiles.map((p) => {
+            const url = p.url || getPlatformUrl(p.platform, p.userStats?.handle);
+            return (
+              <a
+                key={p.platform}
+                href={url || "#"}
+                target="_blank"
+                rel="noreferrer"
+                className="text-foreground/80 hover:text-foreground transition-colors"
+                title={p.platform}
+              >
+                {renderPlatformIcon(p.platform, "h-8 w-8")}
+              </a>
+            );
+          })}
+        </div>
+      </div>
+
+      {displayTags?.length ? (
+        <div className="mt-4 flex flex-wrap content-start gap-2 overflow-hidden h-28 rounded-xl border border-foreground/10 bg-foreground/5 p-3 shadow-inner dark:border-white/10 dark:bg-neutral-900/60">
+          {isDsa ? (
+            displayTags.map((topic) => (
+              <span
+                key={topic.tag}
+                className="rounded-full bg-foreground/5 border border-foreground/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-foreground/80 dark:bg-neutral-800/80 flex items-center gap-1.5"
+                title={`${topic.count} solved`}
+              >
+                {topic.tag} <span className="opacity-50">{topic.count}</span>
+              </span>
+            ))
+          ) : (
+             displayTags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full bg-foreground/5 border border-foreground/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-foreground/80 dark:bg-neutral-800/80"
+              >
+                #{tag}
+              </span>
+            ))
+          )}
         </div>
       ) : null}
 
@@ -382,19 +379,7 @@ function ProfilePanel({
           </div>
         </div>
       ) : null}
-
-      {tags?.length ? (
-        <div className="mt-4 flex flex-wrap gap-2 rounded-2xl border border-foreground/10 bg-foreground/5 p-3 dark:bg-neutral-900/60">
-          {tags.slice(0, 8).map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full bg-foreground/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-foreground/80 dark:bg-neutral-800"
-            >
-              #{tag}
-            </span>
-          ))}
-        </div>
-      ) : null}
+      {/* Moved tags to base level so it expands the card */}
     </div>
   );
 }
@@ -416,6 +401,7 @@ function ProfileCardWithStats({
   platformProfiles = [],
   badges = [],
   questionTotals,
+  dsaTopics = [],
 }) {
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const [showBadgesPopup, setShowBadgesPopup] = useState(false);
@@ -425,30 +411,22 @@ function ProfileCardWithStats({
   const totals = questionTotals || dsaTotals;
   const totalBadges = badges?.length ?? 0;
 
-  const questionBreakdown = isDsa && totals
-    ? [
-        { label: "Easy", value: totals.easy ?? 0, dot: "bg-emerald-300" },
-        { label: "Medium", value: totals.medium ?? 0, dot: "bg-amber-300" },
-        { label: "Hard", value: totals.hard ?? 0, dot: "bg-rose-300" },
-      ]
-    : null;
-
   const statLeft = isDsa
-    ? { label: "Solved", value: totals?.total ?? "--", accent: UI.colors.statGreen, breakdown: questionBreakdown }
+    ? { label: "Questions Solved", value: totals?.total ?? "--", accent: UI.colors.statOrange }
     : { label: "Active Days", value: devActive ?? "--", accent: UI.colors.statGreen };
 
   const statRight = isDsa
-    ? { label: "Badges", value: totalBadges, accent: UI.colors.statOrange }
+    ? { label: "Active Days", value: devActive ?? "--", accent: UI.colors.statGreen }
     : { label: "Contributions", value: devContrib ?? "--", accent: UI.colors.statOrange };
 
   return (
-    <div className="relative order-1 space-y-4 min-[900px]:order-2 min-[900px]:col-span-5 min-[900px]:self-start min-[900px]:-mt-6 w-full flex flex-col items-center">
+    <div className="relative order-1 space-y-4 min-[900px]:order-2 min-[900px]:col-span-5 min-[900px]:self-start min-[900px]:-mt-20 w-full flex flex-col items-center min-[900px]:items-end min-[900px]:justify-self-end">
       <ProfilePanel
         name={name}
         handle={isDsa ? dsaHandle : devHandle}
         statLeft={statLeft}
         statRight={statRight}
-        tags={tags}
+        displayTags={isDsa ? dsaTopics : tags}
         linkLabel={contactLabel}
         linkUrl={contactUrl}
         platformProfiles={platformProfiles}
@@ -461,7 +439,7 @@ function ProfileCardWithStats({
         onUserInteract={onUserInteract}
       />
 
-      <div className="flex w-full max-w-md min-[900px]:max-w-lg gap-3">
+      <div className="flex w-full max-w-md min-[900px]:max-w-[420px] mx-auto min-[900px]:ml-auto min-[900px]:mx-0 gap-3">
         <button
           type="button"
           onClick={() => {

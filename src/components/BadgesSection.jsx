@@ -18,7 +18,7 @@ import {
   siUdemy,
 } from "simple-icons";
 import { getImgixSrcSet, getImgixUrl } from "../lib/utils";
-
+import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures';
 
 function renderPlatformLogo(platform, className = "h-8 w-8") {
   if (!platform) return null;
@@ -44,178 +44,106 @@ function renderPlatformLogo(platform, className = "h-8 w-8") {
   );
 }
 
+function CommonBadgeCard({ title, platform, date, imageUrl, rating, href, tags = [] }) {
+  const largeBadgeSrc = getImgixUrl(imageUrl, { w: 400, q: 75 });
+  const largeBadgeSrcSet = getImgixSrcSet(imageUrl, [200, 400, 600], { q: 75 });
+  const Wrapper = href ? "a" : "div";
+
+  return (
+    <Card className="group flex flex-col h-full border-foreground/10 bg-card shadow-sm transition hover:shadow-md dark:bg-[#212529] overflow-hidden">
+      <Wrapper
+        {...(href ? { href, target: "_blank", rel: "noreferrer" } : {})}
+        className="flex flex-col h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 transition-colors hover:bg-foreground/5 dark:hover:bg-white/5"
+      >
+        <div className="relative flex h-48 w-full items-center justify-center bg-foreground/5 p-6 dark:bg-black/20 border-b border-foreground/5">
+          {imageUrl ? (
+            <img
+              src={largeBadgeSrc}
+              srcSet={largeBadgeSrcSet}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+              alt={title || "Badge Image"}
+              className="h-full w-full object-contain drop-shadow-md transition duration-300 group-hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center opacity-50">
+              {renderPlatformLogo(platform, "h-16 w-16 mb-2")}
+              <span className="text-xs font-semibold uppercase tracking-wider">{platform || "Badge"}</span>
+            </div>
+          )}
+        </div>
+        <CardContent className="flex grow flex-col p-5">
+          <div className="space-y-1">
+            <h3 className="line-clamp-2 text-lg font-bold leading-tight text-foreground transition group-hover:text-amber-500">
+              {title}
+            </h3>
+            <p className="text-sm font-medium text-foreground/60">{platform || "Unknown Issuer"}</p>
+          </div>
+          
+          <div className="mt-4 flex flex-col gap-2.5 text-sm text-foreground/80 w-full opacity-0 transition-all duration-300 group-hover:opacity-100">
+            {date && (
+              <div className="flex justify-between items-center border-b border-foreground/5 pb-1.5">
+                <span className="text-foreground/60 font-medium">Issued</span>
+                <span className="font-semibold text-foreground">{date}</span>
+              </div>
+            )}
+            {tags && tags.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {tags.map((tag, idx) => (
+                  <span key={idx} className="rounded-md bg-foreground/10 px-2 py-0.5 text-xs font-semibold text-foreground/80 uppercase tracking-wide">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+            {href && (
+              <div className="mt-2 text-right">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-500 transition hover:text-emerald-400">
+                  View Credential &rarr;
+                </span>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Wrapper>
+    </Card>
+  );
+}
+
 function CmsBadgeCard({ badge }) {
   const meta = badge.metadata || {};
   const title = meta.badge_name || badge.title;
   const platform = meta.issuing_platform;
   const date = meta.earned_date;
-  const imageUrl = meta.badge_image?.imgix_url;
-  const largeBadgeSrc = getImgixUrl(imageUrl, { w: 112, q: 60 });
-  const largeBadgeSrcSet = getImgixSrcSet(imageUrl, [56, 112, 168], { q: 60 });
-  const smallBadgeSrc = getImgixUrl(imageUrl, { w: 32, q: 60 });
-  const smallBadgeSrcSet = getImgixSrcSet(imageUrl, [24, 32, 48], { q: 60 });
+  const imageUrl = meta.badge_image?.imgix_url || meta.badge_image?.url;
   const rating = meta.star_rating || meta.rating || "--";
   const href = meta.badge_url;
-  const Wrapper = href ? "a" : "div";
+  const tags = meta.tags || badge.tags || [];
 
   return (
-    <Card className="group border-foreground/10 bg-card shadow-sm dark:bg-[#212529]">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-base font-semibold text-foreground line-clamp-2 min-h-[2.5rem]">{title}</CardTitle>
-        <CardDescription className="text-xs text-foreground/60 min-h-[1rem]">
-          {platform || ""}
-        </CardDescription>
-        <CardDescription className="text-xs text-foreground/50 min-h-[1rem]">
-          {date || ""}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <Wrapper
-          {...(href
-            ? {
-                href,
-                target: "_blank",
-                rel: "noreferrer",
-              }
-            : {})}
-          className="relative flex flex-col gap-3 rounded-xl border border-foreground/10 bg-foreground/5 p-3 text-left transition hover:border-foreground/30"
-        >
-                    <div className="pointer-events-none absolute left-1/2 top-0 z-10 w-56 -translate-x-1/2 -translate-y-[115%] rounded-2xl border border-foreground/10 bg-background/95 p-6 opacity-0 shadow-2xl transition-opacity duration-200 group-hover:opacity-100">
-                      <div className="flex items-center justify-center">
-                        {imageUrl ? (
-                          <img
-                            src={largeBadgeSrc}
-                            srcSet={largeBadgeSrcSet}
-                            sizes="112px"
-                            alt={title}
-                            className="h-28 w-28 object-contain"
-                            loading="lazy"
-                            decoding="async"
-                            width="112"
-                            height="112"
-                          />
-                        ) : (
-                          renderPlatformLogo(platform, "h-28 w-28") || <span className="text-xs text-foreground/60">Logo</span>
-                        )}
-                      </div>
-                    </div>
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background text-foreground shadow-sm">
-              {imageUrl ? (
-                <img
-                  src={smallBadgeSrc}
-                  srcSet={smallBadgeSrcSet}
-                  sizes="32px"
-                  alt={title}
-                  className="h-8 w-8 object-contain"
-                  loading="lazy"
-                  decoding="async"
-                  width="32"
-                  height="32"
-                />
-              ) : (
-                renderPlatformLogo(platform) || <span className="text-xs text-foreground/60">Logo</span>
-              )}
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">{title}</p>
-              <p className="text-xs text-foreground/60">{platform || "Issued brand"}</p>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-xs text-foreground/70 min-h-[1.25rem]">
-            <span>Star rating</span>
-            <span className="font-semibold text-foreground">{rating}</span>
-          </div>
-          <p className="text-xs text-foreground/60 min-h-[1rem]">
-            {platform ? `Verified on ${platform}` : ""}
-          </p>
-        </Wrapper>
-      </CardContent>
-    </Card>
+    <CommonBadgeCard
+      title={title}
+      platform={platform}
+      date={date}
+      imageUrl={imageUrl}
+      rating={rating}
+      href={href}
+      tags={tags}
+    />
   );
 }
 
 function CardBadge({ badge }) {
-  const href = badge.url;
-  const largeBadgeSrc = getImgixUrl(badge.icon, { w: 112, q: 60 });
-  const largeBadgeSrcSet = getImgixSrcSet(badge.icon, [56, 112, 168], { q: 60 });
-  const smallBadgeSrc = getImgixUrl(badge.icon, { w: 32, q: 60 });
-  const smallBadgeSrcSet = getImgixSrcSet(badge.icon, [24, 32, 48], { q: 60 });
-  const Wrapper = href ? "a" : "div";
   return (
-    <Card className="group border-foreground/10 bg-card shadow-sm dark:bg-[#212529]">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-base font-semibold text-foreground line-clamp-2 min-h-[2.5rem]">{badge.name}</CardTitle>
-        <CardDescription className="text-xs text-foreground/60 capitalize min-h-[1rem]">
-          {badge.platform || ""}
-        </CardDescription>
-        <CardDescription className="text-xs text-amber-500 min-h-[1rem]">
-          {badge.stars ? `${badge.stars}★` : ""}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <Wrapper
-          {...(href
-            ? {
-                href,
-                target: "_blank",
-                rel: "noreferrer",
-              }
-            : {})}
-          className="relative flex flex-col gap-3 rounded-xl border border-foreground/10 bg-foreground/5 p-3 text-left transition hover:border-foreground/30"
-        >
-                    <div className="pointer-events-none absolute left-1/2 top-0 z-10 w-56 -translate-x-1/2 -translate-y-[115%] rounded-2xl border border-foreground/10 bg-background/95 p-6 opacity-0 shadow-2xl transition-opacity duration-200 group-hover:opacity-100">
-                      <div className="flex items-center justify-center">
-                        {badge.icon ? (
-                          <img
-                            src={largeBadgeSrc}
-                            srcSet={largeBadgeSrcSet}
-                            sizes="112px"
-                            alt={badge.name}
-                            className="h-28 w-28 object-contain"
-                            loading="lazy"
-                            decoding="async"
-                            width="112"
-                            height="112"
-                          />
-                        ) : (
-                          renderPlatformLogo(badge.platform, "h-28 w-28") || <span className="text-xs text-foreground/60">Logo</span>
-                        )}
-                      </div>
-                    </div>
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background text-foreground shadow-sm">
-              {badge.icon ? (
-                <img
-                  src={smallBadgeSrc}
-                  srcSet={smallBadgeSrcSet}
-                  sizes="32px"
-                  alt={badge.name}
-                  className="h-8 w-8 object-contain"
-                  loading="lazy"
-                  decoding="async"
-                  width="32"
-                  height="32"
-                />
-              ) : (
-                renderPlatformLogo(badge.platform) || <span className="text-xs text-foreground/60">Logo</span>
-              )}
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">{badge.name}</p>
-              <p className="text-xs text-foreground/60 capitalize">{badge.platform}</p>
-            </div>
-          </div>
-          <div className="flex items-center justify-between text-xs text-foreground/70 min-h-[1.25rem]">
-            <span>Star rating</span>
-            <span className="font-semibold text-foreground">{badge.stars ?? "--"}</span>
-          </div>
-          <p className="text-xs text-foreground/60 min-h-[1rem]">
-            {badge.platform ? `Verified on ${badge.platform}` : ""}
-          </p>
-        </Wrapper>
-      </CardContent>
-    </Card>
+    <CommonBadgeCard
+      title={badge.name}
+      platform={badge.platform}
+      date={badge.date}
+      imageUrl={badge.icon}
+      rating={badge.stars || "--"}
+      href={badge.url}
+      tags={badge.tags || []}
+    />
   );
 }
 
@@ -243,37 +171,36 @@ function BadgesSection() {
       <div className="space-y-2">
         <h2 className="text-3xl font-semibold text-foreground">Badges</h2>
         <p className="text-sm text-foreground/70">
-          CMS badges first, followed by platform badges from the profile card.
+          Here are some badges I've earned from various platforms.
         </p>
       </div>
 
-      <div className="md:hidden">
-        <Carousel className="relative" opts={{ align: "start", loop: true }}>
-          <CarouselContent className="cursor-grab active:cursor-grabbing">
-            {cmsBadges.map((badge) => (
-              <CarouselItem key={badge.slug} className="basis-full">
+      <Carousel
+        className="relative"
+        opts={{ align: "start", loop: true, skipSnaps: false }}
+        plugins={[WheelGesturesPlugin()]}
+      >
+        <CarouselContent className="cursor-grab active:cursor-grabbing pb-4 pt-1">
+          {cmsBadges.map((badge) => (
+            <CarouselItem key={badge.slug} className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4 2xl:basis-1/5">
+              <div className="h-full mb-2">
                 <CmsBadgeCard badge={badge} />
-              </CarouselItem>
-            ))}
-            {cardBadges.map((badge) => (
-              <CarouselItem key={badge.id} className="basis-full">
+              </div>
+            </CarouselItem>
+          ))}
+          {cardBadges.map((badge) => (
+            <CarouselItem key={badge.id} className="basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4 2xl:basis-1/5">
+              <div className="h-full mb-2">
                 <CardBadge badge={badge} />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
-      </div>
-
-      <div className="hidden gap-4 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {cmsBadges.map((badge) => (
-          <CmsBadgeCard key={badge.slug} badge={badge} />
-        ))}
-        {cardBadges.map((badge) => (
-          <CardBadge key={badge.id} badge={badge} />
-        ))}
-      </div>
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <div className="hidden sm:block">
+          <CarouselPrevious className="-left-4 sm:-left-6 lg:-left-8" />
+          <CarouselNext className="-right-4 sm:-right-6 lg:-right-8" />
+        </div>
+      </Carousel>
     </section>
   );
 }

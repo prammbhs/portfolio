@@ -67,7 +67,7 @@ function Navbar() {
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-12 px-3 sm:px-4 lg:px-6">
         <a href="#home" className=" w-min text-3xl leading-6 tracking-tight font-bold text-foreground">
-          <p className="font-sans">Paramjit Patel</p>
+          <p className="font-sans">Paramjit</p>
         </a>
 
         <div className="hidden items-center gap-8 min-[900px]:flex">

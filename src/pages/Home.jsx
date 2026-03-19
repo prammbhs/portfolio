@@ -13,10 +13,11 @@ function Home() {
     setView,
     pauseAutoRotate,
     leetStats,
-    codolioStats,
+    githubStats,
     platformProfiles,
     dsaTotals,
-    platformBadges,
+    dsaTopics,
+    platformBadges,    
     devActive,
     devContrib,
     devProfile,
@@ -27,7 +28,7 @@ function Home() {
   } = useHomeData();
 
   return (
-    <section id="home" className="mx-auto max-w-5xl pt-16 pb-24 min-[900px]:pt-24 min-[900px]:pb-28 space-y-20">
+    <section id="home" className="mx-auto max-w-6xl px-3 sm:px-4 lg:px-6 pt-16 pb-24 min-[900px]:pt-24 min-[900px]:pb-28 space-y-20">
       <div className="flex flex-col gap-8 min-[900px]:grid min-[900px]:grid-cols-12 min-[900px]:items-start min-[900px]:gap-12">
         <Suspense fallback={<div className="h-[520px] w-full max-w-lg rounded-3xl border border-foreground/10 bg-foreground/5" />}> 
           <ProfileCardWithStats
@@ -36,8 +37,9 @@ function Home() {
             setView={setView}
             onUserInteract={pauseAutoRotate}
             dsaTotals={dsaTotals}
+            dsaTopics={dsaTopics}
             dsaHandle={leetStats?.handle}
-            devHandle={codolioStats?.handle}
+            devHandle={githubStats?.handle}
             devActive={devActive}
             devContrib={devContrib}
             devProfile={devProfile}
