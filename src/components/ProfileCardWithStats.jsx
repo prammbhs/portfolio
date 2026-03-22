@@ -72,7 +72,6 @@ function ProfilePanel({
 }) {
   const [transitionsDisabled, setTransitionsDisabled] = useState(false);
   const transitionResetTimer = useRef();
-  const initial = name?.[0]?.toUpperCase?.() || "P";
 
   const renderPlatformIcon = useCallback((key, className = "h-6 w-6") => {
     const icons = {
@@ -185,8 +184,8 @@ function ProfilePanel({
 
       <div className="mt-2 flex flex-col items-center gap-3 min-[900px]:gap-2 text-center">
         <div className="relative group perspective-1000">
-          <div className="flex h-36 w-36 min-[900px]:h-28 min-[900px]:w-28 items-center justify-center rounded-full bg-gradient-to-br from-foreground/5 to-foreground/10 border border-foreground/10 text-6xl min-[900px]:text-5xl font-black text-foreground shadow-lg dark:bg-neutral-800 transition-all duration-700 ease-out group-hover:scale-110 group-hover:-translate-y-2 group-hover:rotate-3 group-hover:shadow-[0_20px_40px_rgb(0,0,0,0.15)] ring-4 ring-transparent group-hover:ring-foreground/5" aria-hidden>
-            {initial}
+          <div className="flex h-36 w-36 min-[900px]:h-28 min-[900px]:w-28 items-center justify-center rounded-full bg-gradient-to-br from-foreground/5 to-foreground/10 border border-foreground/10 shadow-lg overflow-hidden dark:bg-neutral-800 transition-all duration-700 ease-out group-hover:scale-110 group-hover:-translate-y-2 group-hover:rotate-3 group-hover:shadow-[0_20px_40px_rgb(0,0,0,0.15)] ring-4 ring-transparent group-hover:ring-foreground/5" aria-hidden>
+            <img src="/profileimage.jpg" alt={name || "Profile"} className="h-full w-full object-cover" />
           </div>
         </div>
         <div className="space-y-1">
