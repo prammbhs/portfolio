@@ -153,7 +153,7 @@ function ProjectSection() {
       <div className="mx-auto max-w-6xl px-6 text-center">
         <h2 className="text-4xl font-bold tracking-tight text-foreground md:text-5xl">Featured Projects</h2>
         <p className="mt-4 text-base font-medium text-foreground/60 max-w-2xl mx-auto">
-          These are my recent projects, curated to match the theme and highlight the work I’m most proud of.
+          These are my recent projects
         </p>
       </div>
 
