@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 @font-face {
   font-family: "InterLocal";
   src: url("/font/GeistMono-Regular.woff2") format("woff2");
@@ -6,8 +7,10 @@
   font-style: normal;
   font-display: swap;
 }
+
 /*---break---*/
 @custom-variant dark (&:is(.dark *));
+
 /*#181a1b*/
 /*---break---*/
 @theme inline {
@@ -50,6 +53,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 }
+
 /*---break---*/
 :root {
   --radius: 0.625rem;
@@ -85,6 +89,7 @@
   --sidebar-border: oklch(0.88 0.006 264.531);
   --sidebar-ring: oklch(0.62 0.022 261.325);
 }
+
 /*---break---*/
 .dark {
   --background: #343a40;
@@ -119,11 +124,13 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
+
 /*---break---*/
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
     font-family: "InterLocal", "Geist Mono", monospace;

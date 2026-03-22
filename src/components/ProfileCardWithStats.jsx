@@ -29,7 +29,7 @@ const UI = {
 function StatBlock({ label, value, accent, onClick, transitionsDisabled }) {
   const clickable = Boolean(onClick);
   const Wrapper = clickable ? "button" : "div";
-  const hoverExtras = transitionsDisabled ? "" : "hover:-translate-y-0.5 hover:shadow-lg hover:border-foreground/60";
+  const hoverExtras = transitionsDisabled ? "" : "hover:-translate-y-1 hover:scale-[1.02] hover:shadow-xl hover:bg-foreground/10 hover:border-foreground/30";
   
   return (
     <Wrapper
@@ -38,7 +38,7 @@ function StatBlock({ label, value, accent, onClick, transitionsDisabled }) {
       className={`min-w-0 w-full rounded-xl border border-foreground/10 bg-foreground/5 p-4 shadow-inner text-left dark:border-white/10 dark:bg-neutral-800/40 flex flex-col justify-center items-center ${
         clickable
           ? `cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50 ${hoverExtras} ${
-              transitionsDisabled ? "" : "transition"
+              transitionsDisabled ? "" : "transition-all duration-300 ease-out"
             }`
           : ""
       }`}
@@ -179,13 +179,13 @@ function ProfilePanel({
 
   return (
     <div
-      className="relative w-full max-w-md min-[900px]:max-w-[420px] overflow-hidden mx-auto min-[900px]:ml-auto min-[900px]:mx-0 rounded-3xl border border-foreground/12 bg-card p-6 text-foreground shadow-2xl sm:p-7 min-[900px]:p-6 dark:bg-[#212529]"
+      className="relative w-full max-w-md min-[900px]:max-w-[420px] overflow-hidden mx-auto min-[900px]:ml-auto min-[900px]:mx-0 rounded-[2rem] border border-foreground/10 bg-card/80 backdrop-blur-xl p-6 text-foreground shadow-[0_8px_30px_rgb(0,0,0,0.08)] sm:p-7 min-[900px]:p-6 dark:bg-[#212529]/90 transition-all duration-500 ease-in-out hover:shadow-[0_20px_40px_rgb(0,0,0,0.12)]"
       style={transitionsLocked ? { transition: "none" } : undefined}
     >
 
       <div className="mt-2 flex flex-col items-center gap-3 min-[900px]:gap-2 text-center">
-        <div className="relative">
-          <div className="flex h-36 w-36 min-[900px]:h-28 min-[900px]:w-28 items-center justify-center rounded-full border-[3px] border-[#FFA116] bg-foreground/5 text-6xl min-[900px]:text-5xl font-black text-foreground shadow-xl dark:bg-neutral-800" aria-hidden>
+        <div className="relative group perspective-1000">
+          <div className="flex h-36 w-36 min-[900px]:h-28 min-[900px]:w-28 items-center justify-center rounded-full bg-gradient-to-br from-foreground/5 to-foreground/10 border border-foreground/10 text-6xl min-[900px]:text-5xl font-black text-foreground shadow-lg dark:bg-neutral-800 transition-all duration-700 ease-out group-hover:scale-110 group-hover:-translate-y-2 group-hover:rotate-3 group-hover:shadow-[0_20px_40px_rgb(0,0,0,0.15)] ring-4 ring-transparent group-hover:ring-foreground/5" aria-hidden>
             {initial}
           </div>
         </div>
@@ -420,7 +420,7 @@ function ProfileCardWithStats({
     : { label: "Contributions", value: devContrib ?? "--", accent: UI.colors.statOrange };
 
   return (
-    <div className="relative order-1 space-y-4 min-[900px]:order-2 min-[900px]:col-span-5 min-[900px]:self-start min-[900px]:-mt-20 w-full flex flex-col items-center min-[900px]:items-end min-[900px]:justify-self-end">
+    <div className="relative order-1 space-y-4 min-[900px]:order-2 min-[900px]:col-span-5 min-[900px]:self-start min-[900px]:-mt-20 w-full flex flex-col items-center min-[900px]:items-end min-[900px]:justify-self-end animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-out fill-mode-both">
       <ProfilePanel
         name={name}
         handle={isDsa ? dsaHandle : devHandle}
